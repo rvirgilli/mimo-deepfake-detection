@@ -175,7 +175,7 @@ rows:
     artifacts:
       la_score: experiments/paper_final/wav2vec2_fullft_multiseed/seed_42/eval/scores_LA_eval.txt
       la_result: experiments/paper_final/wav2vec2_fullft_multiseed/seed_42/eval/results_LA_eval.txt
-      config: local_private/.../run_w2v_fullft.sh
+      config: <local-historical-script>/run_w2v_fullft.sh
       checkpoint: experiments/paper_final/wav2vec2_fullft_multiseed/seed_42/models/epoch_32.pth
       df_score: experiments/paper_final/wav2vec2_fullft_multiseed/seed_42/eval/scores_DF_eval.txt
       df_result: experiments/paper_final/wav2vec2_fullft_multiseed/seed_42/eval/results_DF_eval.txt
@@ -189,7 +189,7 @@ rows:
     artifacts:
       la_score: experiments/paper_final/wav2vec2_fullft_multiseed/seed_123/eval/scores_LA_eval.txt
       la_result: experiments/paper_final/wav2vec2_fullft_multiseed/seed_123/eval/results_LA_eval.txt
-      config: local_private/.../run_w2v_fullft.sh
+      config: <local-historical-script>/run_w2v_fullft.sh
       checkpoint: experiments/paper_final/wav2vec2_fullft_multiseed/seed_123/models/epoch_38.pth
       df_score: experiments/paper_final/wav2vec2_fullft_multiseed/seed_123/eval/scores_DF_eval.txt
       df_result: experiments/paper_final/wav2vec2_fullft_multiseed/seed_123/eval/results_DF_eval.txt

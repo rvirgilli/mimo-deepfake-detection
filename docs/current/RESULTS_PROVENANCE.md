@@ -128,7 +128,7 @@ python evaluate_2021_LA.py ../experiments/eval_wav2vec2_adapter/scores_LA_eval.t
 # Search for seed-456 failure/corruption evidence:
 # grep -RIn --exclude='scores_*' --exclude='*.tfevents.*' \
 #   -E '456|outlier|fail|error|interrupt|corrupt|exclude|bad|wrong' \
-#   experiments/paper_final/mimo_frozen_multiseed docs local_private/.../paper_final
+#   experiments/paper_final/mimo_frozen_multiseed docs <local-historical-scripts>/paper_final
 # Result: no seed-456-specific failure/corruption note found; only routine audio loading warnings.
 
 # 2026-05-25: MiMo full FT aggregate check.

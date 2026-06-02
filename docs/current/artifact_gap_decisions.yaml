@@ -18,14 +18,14 @@ gaps:
   - row_id: wav2vec2_full_local
     seed_id: "42"
     kind: config
-    value: local_private/.../run_w2v_fullft.sh
+    value: <local-historical-script>/run_w2v_fullft.sh
     decision: private_local_script
     reason: Historical orchestration script was moved out of the public branch with other local-only materials.
     action: Keep private locally; publish only sanitized protocol summaries.
   - row_id: wav2vec2_full_local
     seed_id: "123"
     kind: config
-    value: local_private/.../run_w2v_fullft.sh
+    value: <local-historical-script>/run_w2v_fullft.sh
     decision: private_local_script
     reason: Historical orchestration script was moved out of the public branch with other local-only materials.
     action: Keep private locally; publish only sanitized protocol summaries.

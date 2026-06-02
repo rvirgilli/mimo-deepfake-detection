@@ -3,7 +3,7 @@
 Date: 2026-06-02
 Status: public reader map
 
-This directory keeps curated documentation and machine-readable summaries. Raw execution logs, stdout/stderr, PIDs, submitted PDFs, reviewer notes, and local run artifacts belong in ignored local storage such as `local_private/`.
+This directory keeps curated documentation and machine-readable summaries. Generated run artifacts are kept out of the public documentation tree unless summarized for reuse.
 
 ## Read first
 

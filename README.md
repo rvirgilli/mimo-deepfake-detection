@@ -2,28 +2,16 @@
 
 Research code for audio deepfake detection experiments with self-supervised speech representations and MiMo-style audio tokenizers.
 
-The public repository contains reusable code, tests, portable configuration templates, and curated documentation. Raw experiment logs, submitted-paper artifacts, reviewer notes, local paths, and generated run outputs are kept outside Git under `local_private/` or other ignored directories.
+This repository contains maintained code, tests, portable configuration templates, and curated documentation. Large generated artifacts such as checkpoints, cached features, run outputs, and machine-specific dataset/dependency paths are not tracked.
 
-## What is tracked
+## Repository contents
 
 - `mimodf/` — maintained audit, data, scoring, training, reporting, and experiment utilities.
 - `tests/` — focused tests for maintained behavior.
 - `configs/` — portable configuration templates.
 - `src/` — legacy compatibility layer used by some controlled paths.
-- `docs/current/` — curated public notes and machine-readable summaries.
-- `scripts/` — reusable scripts; local orchestration scripts belong in `local_private/`.
-
-## What is not tracked
-
-The following are intentionally local-only:
-
-- raw execution logs and stdout/stderr dumps;
-- checkpoints, model weights, cached features, and generated scores;
-- submitted PDFs, rebuttals, reviewer notes, and paper build artifacts;
-- machine-specific paths and local dependency clones;
-- exploratory notebooks/scripts that are not reusable.
-
-Use `local_private/` for important non-public materials. It is ignored by Git.
+- `docs/current/` — curated notes and machine-readable summaries.
+- `scripts/` — reusable scripts.
 
 ## Local setup
 

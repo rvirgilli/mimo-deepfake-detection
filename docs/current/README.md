@@ -1,8 +1,6 @@
 # Current docs
 
-This directory contains curated public documentation and machine-readable summaries.
-
-Raw execution logs and generated artifacts are intentionally local-only. Keep them under `local_private/`, `experiments/`, `outputs/`, `logs/`, or another ignored path. When a result should be shared publicly, add a sanitized summary rather than committing raw logs.
+This directory contains curated documentation and machine-readable summaries.
 
 Useful entry points:
 
