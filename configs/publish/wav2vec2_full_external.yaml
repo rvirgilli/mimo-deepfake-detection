@@ -1,0 +1,16 @@
+model: wav2vec2
+strategy: full_ft_tak_ssl_local_reproduction
+seed: 42
+protocol:
+  train_set: ASVspoof2019_LA_train
+  validation_set: Tak_SSL_validation_loss
+  checkpoint_selection_set: Tak_SSL_validation_loss_from_train_log
+  eval_set: ASVspoof2021_LA_eval_and_DF_eval
+optimizer:
+  name: adam
+  lr: 0.000001
+  weight_decay: 0.0001
+  encoder_lr: null
+scorer:
+  la: official_asvspoof2021_la
+  df: eer_only

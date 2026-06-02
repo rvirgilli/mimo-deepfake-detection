@@ -1,0 +1,222 @@
+schema_version: mimodf-exploratory-wave-plan/v1
+matrix_id: wave1_exploratory_frontend_shift_map_v2
+created: "2026-05-30"
+status: closed_exploratory_wave
+scope: completed_exploratory_map_no_training_or_paper_claims
+intent: >
+  Define the intended shape of the first exploratory research wave: broad, cheap,
+  feature-only mapping across frontend families and shift axes before any deeper
+  mechanism study, training, HPO, or paper claim.
+
+wave_semantics:
+  wave1: broad exploratory map, including WavLM/log-mel/media-transform completion even when immutable run IDs have wave2 prefixes
+  wave2: completed CLAMTTS deepening wave defined in docs/current/wave2_deepening_plan.yaml
+  wave3: planned trained validation wave defined in docs/current/wave3_training_validation_plan.yaml
+  note: Do not rename historical run IDs; clarify semantics in closeout docs instead.
+
+principles:
+  - Early waves are broad and shallow; later waves deepen only effects that survive grouped controls.
+  - Random splits are sanity checks, not headline evidence.
+  - Source-holdout and explicit shift axes are the first claim-bearing validations.
+  - MiMo is one tokenizer-family candidate, not the organizing goal.
+  - No paper number without provenance; no silent seed exclusions.
+  - Smoke artifacts are technical evidence only, not metric evidence.
+
+literature_anchors:
+  - id: codecfake_plus
+    finding: >
+      CodecFake+ defines CoSG and CoRS subsets plus a neural-audio-codec taxonomy using
+      vector quantizer, auxiliary objective, and decoder type fields. CoRS is a proxy for
+      CoSG detection, not literal fake speech.
+    sources:
+      - https://arxiv.org/html/2501.08238v2
+      - https://responsiblegenai.github.io/CodecFake-Plus-Dataset/
+      - https://huggingface.co/datasets/CodecFake/CodecFake_Plus_Dataset
+  - id: source_generalization
+    finding: >
+      Codec/source tracing work reports that codec-resynthesized training data can overfit
+      non-speech regions and fail on unseen CoSG content; grouped/source-shift validation
+      is therefore central.
+    sources:
+      - https://arxiv.org/html/2506.07294v3
+  - id: ssl_baseline_family
+    finding: >
+      SSL speech encoders such as wav2vec2, XLS-R, HuBERT, WavLM, and Whisper-family
+      features are strong audio-deepfake baselines; tokenizer results must be compared
+      against this family.
+    sources:
+      - https://arxiv.org/html/2309.05384v2
+      - https://arxiv.org/html/2408.07414
+  - id: media_robustness
+    finding: >
+      Robustness benchmarks and challenges stress MP3/Opus/AAC-style compression,
+      resampling, noise, reverberation, packet loss, and laundering/communication effects.
+      A tiny transform smoke belongs in the exploratory stage.
+    sources:
+      - https://arxiv.org/html/2503.17577
+      - https://arxiv.org/html/2504.12423v2
+      - https://arxiv.org/html/2605.09568
+      - https://arxiv.org/html/2510.03387v1
+
+frontends:
+  - id: ssl_xlsr
+    family: ssl
+    required: true
+    role: strong public SSL reference
+    current_status: completed_in_existing_wave1
+    artifacts:
+      - features/mimodf/wave1/codecfake_cosg_wav2vec2_xlsr_b1
+  - id: tokenizer_mimo_continuous
+    family: tokenizer
+    required: true
+    role: MiMo continuous representation contrast
+    current_status: completed_in_existing_wave1
+    artifacts:
+      - features/mimodf/wave1/codecfake_cosg_mimo_continuous_25hz_b1
+  - id: tokenizer_mimo_rvq
+    family: tokenizer
+    required: true
+    role: early/late/all RVQ semantic-vs-residual ablation
+    current_status: completed_in_existing_wave1
+    artifacts:
+      - features/mimodf/wave1/codecfake_cosg_mimo_rvq_early_b1
+      - features/mimodf/wave1/codecfake_cosg_mimo_rvq_late_b1
+      - features/mimodf/wave1/codecfake_cosg_mimo_rvq_all_b1
+  - id: acoustic_logmel
+    family: acoustic
+    required: true
+    role: boring baseline to test whether complex frontend structure matters
+    current_status: completed_in_wave1_completion
+    artifacts:
+      - features/mimodf/wave1/codecfake_cosg_logmel_80_100hz
+  - id: ssl_second_comparator
+    family: ssl
+    required: optional
+    role: test whether a strong SSL result is checkpoint-specific
+    current_status: completed_as_wave2_wavlm
+    artifacts:
+      - features/mimodf/wave2/codecfake_cosg_wavlm_base_plus_b1
+
+primary_dataset:
+  id: codecfake_cosg
+  role: primary exploratory dataset for binary and source/taxonomy diagnostics
+  protocol: features/mimodf/wave0/codecfake_plus_protocol.jsonl
+  why: small, staged, source/taxonomy-rich, directly tied to codec-based generation
+
+caveated_datasets:
+  - id: codecfake_cors
+    status: not_wave1_claim_bearing_without_policy
+    caveat: CoRS is codec-resynthesized speech, not literal fake speech; labeling must be explicit.
+  - id: asvspoof5_or_public_robustness
+    status: blocked_or_later_wave
+    caveat: use only after local staging/provenance is pinned.
+
+validation_rows:
+  - row_id: random_split_sanity
+    status: completed_in_existing_wave1
+    claim_weight: diagnostic_only
+    question: Do all feature families carry any separability signal under easy splits?
+    metrics: [eer, auroc, balanced_accuracy]
+    required_controls:
+      - fixed seed list
+      - report all seeds
+      - never headline these metrics
+  - row_id: source_holdout_primary
+    status: completed_in_existing_wave1_and_wave2
+    claim_weight: primary_exploratory_evidence
+    question: Which frontend family transfers across unseen CodecFake+ CoSG sources?
+    metrics: [eer, auroc, balanced_accuracy, macro_f1, support]
+    required_controls:
+      - hold out all rows for each source
+      - report bonafide/spoof support per source
+      - compare against SSL and acoustic baselines when available
+  - row_id: taxonomy_hypothesis_generation
+    status: partially_completed_in_existing_wave1
+    claim_weight: hypothesis_generator_only
+    question: Do representations encode codec taxonomy fields beyond obvious source/content confounds?
+    labels: [quantizer_type, auxiliary_objective, decoder_type]
+    metrics: [balanced_accuracy, macro_f1, per_class_support]
+    required_controls:
+      - mark random taxonomy splits as confounded
+      - require grouped/source-held-out taxonomy controls before causal language
+  - row_id: rvq_semantic_residual_ablation
+    status: completed_in_existing_wave1
+    claim_weight: mechanism_hint
+    question: Are late/residual MiMo codebooks more forensic than early/semantic codebooks?
+    metrics: [eer, auroc, balanced_accuracy]
+    required_controls:
+      - same protocol rows across codebook groups
+      - manifest selected quantizers
+  - row_id: ssl_mimo_complementarity
+    status: completed_in_existing_wave1
+    claim_weight: mechanism_hint
+    question: Do MiMo and SSL make different errors under source shift?
+    metrics: [eer_delta, auroc_delta, score_correlation, error_overlap]
+    required_controls:
+      - compare best single frontend against fusion
+      - do not claim deployable fusion from equal-weight averages
+  - row_id: acoustic_logmel_baseline
+    status: completed_in_wave1_completion
+    claim_weight: required_before_deepening
+    question: Do complex SSL/tokenizer representations beat a boring acoustic summary under the same grouped probes?
+    metrics: [eer, auroc, balanced_accuracy]
+    required_controls:
+      - train-only standardization
+      - same source-holdout protocol as SSL/MiMo
+      - simple mean/std pooling only
+  - row_id: tiny_media_transform_smoke
+    status: logmel_feature_drift_completed
+    claim_weight: technical_plus_directional_only
+    question: Which feature families are most stable under simple compression/resampling/noise shifts?
+    metrics: [score_correlation, eer_delta, auroc_delta, output_count]
+    required_controls:
+      - start with 16 to 32 balanced rows
+      - log transform command/tool/version/hash for every output
+      - transformed audio inherits label only as a stress-test policy, not new ground truth
+      - stop before full-CoSG transform generation unless separately approved
+
+promotion_rules:
+  promote_to_deep_wave_if:
+    - effect survives source-holdout or explicit transform shift
+    - improvement is not limited to one tiny low-support source
+    - error complementarity is predictive enough to name when a frontend should help
+    - mechanism can be expressed before running the next experiment
+  do_not_promote_if:
+    - effect appears only in random row splits
+    - taxonomy accuracy lacks grouped/source controls
+    - frontend loses grouped controls and offers no complementary errors
+    - proposed experiment only adds another model without testing a declared shift
+
+current_coverage_assessment:
+  completed:
+    - source-holdout over XLS-R, MiMo continuous, MiMo RVQ early/late/all
+    - random split diagnostics
+    - taxonomy random split diagnostics
+    - fusion/error-overlap diagnostics
+    - CLAMTTS-vs-NS source diagnostic
+    - WavLM second-SSL comparator as Wave 2
+    - log-mel mean/std acoustic baseline
+  generated_and_summarized:
+    - /tmp/mimodf-media-transform-smoke-v1/transformed_protocol.jsonl
+    - /tmp/mimodf-media-transform-smoke-v1/manifest.json
+    - /tmp/mimodf-media-transform-smoke-v1/logmel_features/manifest.json
+    - /tmp/mimodf-media-transform-smoke-v1/logmel_drift_summary.json
+  remaining_before_deep_waves: []
+  handoff_to_wave3:
+    - Wave 2 CLAMTTS deepening is complete and source-local.
+    - log-mel and XLS-R transform drift are complete as directional smoke.
+    - Wave 3 should use targeted trained validation, not more broad frontend search.
+
+next_allowed_actions:
+  - Follow docs/current/wave3_training_validation_plan.yaml.
+  - Audit CoRS extraction/readability/index state before CoRS training.
+  - Build CodecFake training/scoring and durable transform-score infrastructure.
+  - Do not extract/train expensive MiMo/WavLM variants without a new mechanism-specific reason.
+
+not_allowed_in_wave1_completion:
+  - full training
+  - Optuna/HPO
+  - broad ASVspoof evaluation
+  - full CoRS use without labeling policy
+  - paper/SOTA claims
+  - additional broad frontend search without a declared mechanism

@@ -1,0 +1,41 @@
+# @package _group_
+# AASIST backend architecture configuration
+#
+# These parameters control the graph attention network architecture.
+# Modify for architecture search or to tune model capacity.
+
+# Graph attention layer dimensions
+# First layer: input projection, Second layer: heterogeneous GAT
+gat_dims: [64, 32]
+
+# Pooling ratios for graph pooling layers
+# Controls how aggressively nodes are pruned at each layer
+pool_ratios: [0.5, 0.5, 0.5, 0.5]
+
+# Temperature for attention softmax
+# Higher = softer attention, Lower = sharper attention
+temperatures: [2.0, 2.0, 100.0, 100.0]
+
+# Dropout rates
+dropout: 0.5        # Final layer dropout
+dropout_way: 0.2    # Path dropout (inference paths)
+dropout_input: 0.2  # Input dropout in GAT layers
+
+# Filter sizes for residual encoder
+# filts_0: Projection output dimension (AASIST input)
+# encoder_scale: Multiplier for encoder channel sizes (default 1.0)
+# For MiMo (1280-dim): consider filts_0=192 or 256 to reduce compression
+# For wav2vec2 (768-dim): filts_0=128 is usually sufficient
+filts_0: 128  # Projection output / AASIST input dimension
+encoder_scale: 1.0  # Scale encoder channels: 1.0=default, 1.5=medium, 2.0=large
+
+# Projection layer configuration
+# Maps frontend output (e.g., 1280 for MiMo, 1024 for wav2vec2) to AASIST input (128)
+# Options: 'linear' (original AASIST), 'mlp' (better for MiMo's discriminative features)
+projection:
+  type: linear  # 'linear' or 'mlp'
+  # MLP-specific parameters (only used when type='mlp')
+  hidden_dims: [512, 256]  # Hidden layer dimensions
+  activation: gelu         # Activation: gelu, relu, selu, swish, tanh
+  dropout: 0.1             # Dropout rate between layers
+  use_batchnorm: true      # Whether to use batch normalization

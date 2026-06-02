@@ -1,0 +1,21 @@
+# Copy to docs/current/external_dependencies.local.yaml to override local paths.
+# The local file is ignored by Git.
+#
+# Typical use: point release-gate at a clean scorer-only SSL_Anti-spoofing clone
+# while preserving the historical dirty local clone at SSL_Anti-spoofing/.
+
+dependencies:
+  - name: SSL_Anti-spoofing
+    path: local_dependencies/SSL_Anti-spoofing-clean
+    # For a scorer-only clone, keep the official scorer files but do not require
+    # the XLS-R checkpoint. If the same clone will also be used for Tak/wav2vec2
+    # reruns, remove this required_paths override and provide xlsr2_300m.pt.
+    required_paths:
+      - path: evaluate_2021_LA.py
+        kind: file
+        expected_sha256: 04475cf8abe66a040866cdcd734f98e4547fd2cca020d7de78a9849c00ed424d
+      - path: eval_metric_LA.py
+        kind: file
+        expected_sha256: db993ad03a892d1eb50f5fdef83cf2ac1dc9a1960aa743cc1b307540d8fc1964
+    notes:
+      - Local override for clean scorer clone; keep historical local clone untouched.

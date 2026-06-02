@@ -1,0 +1,131 @@
+[project]
+name = "mimo-deepfake-detection"
+version = "0.1.0"
+description = "Audio deepfake detection using MiMo-Audio-Tokenizer"
+readme = "README.md"
+license = { text = "Apache-2.0" }
+requires-python = ">=3.12"
+authors = [
+    { name = "UFG" }
+]
+keywords = ["deepfake", "audio", "detection", "asvspoof", "mimo"]
+
+dependencies = [
+    "torch>=2.8.0",
+    "torchaudio>=2.8.0",
+    "numpy>=2.0",
+    "librosa>=0.10.0",
+    "soundfile>=0.12.0",
+    "tqdm>=4.60.0",
+    "PyYAML>=6.0",
+]
+
+[project.optional-dependencies]
+# MiMo feature extraction (requires flash-attn)
+mimo = [
+    "flash-attn>=2.5.0",
+    "einops>=0.7.0",
+    "transformers>=4.40.0",
+]
+
+# Hugging Face SSL smoke feature extraction
+ssl = [
+    "transformers>=4.40.0",
+]
+
+# Training with Hydra config (Python 3.12 compatible)
+training = [
+    "hydra-core>=1.3.0",
+    "omegaconf>=2.3.0",
+    "tensorboard>=2.10.0",
+    "tensorboardX>=2.5",
+    "scikit-learn>=1.0.0",
+]
+
+# SSL_Anti-spoofing baseline (Python 3.10 only - use separate venv)
+# Note: fairseq and old hydra versions are incompatible with Python 3.12
+# Use SSL_Anti-spoofing/.venv/ instead
+baseline = [
+    "pandas>=2.0.0",
+]
+
+# Development tools
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "black>=23.0.0",
+    "ruff>=0.8.0",
+]
+
+# All dependencies (except baseline which needs Python 3.10)
+all = [
+    "mimo-deepfake-detection[mimo,ssl,training,dev]",
+]
+
+[project.urls]
+Homepage = "https://github.com/your-username/mimo-deepfake-detection"
+Documentation = "https://github.com/your-username/mimo-deepfake-detection#readme"
+Repository = "https://github.com/your-username/mimo-deepfake-detection.git"
+
+[project.scripts]
+mimodf = "mimodf.cli:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+# `src` is shipped only for legacy compatibility paths used by controlled eval/training
+# commands. New maintained code should live under `mimodf` and pass Ruff.
+packages = ["mimodf", "src"]
+exclude = [
+    "models/",
+    "SSL_Anti-spoofing/",
+    "experiments/",
+    "*.pth",
+    "*.pt",
+]
+
+[tool.uv]
+# Use PyTorch CUDA 13.0 index for GPU support
+extra-index-url = ["https://download.pytorch.org/whl/cu130"]
+
+[tool.uv.sources]
+# Local MiMo tokenizer package (uncomment if MiMo-Audio-Tokenizer-Standalone exists)
+# mimo-audio-tokenizer = { path = "MiMo-Audio-Tokenizer-Standalone", editable = true }
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+extend-exclude = [
+    "MiMo-Audio-Tokenizer/**",
+    "SSL_Anti-spoofing/**",
+    "docs/archive/**",
+    "evaluate.py",
+    "experiments/**",
+    "features/**",
+    "local_dependencies/**",
+    "models/**",
+    "optuna_train.py",
+    "outputs/**",
+    "scripts/archive/**",
+    "src/**",
+    "train.py",
+]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "C4"]
+ignore = ["E501"]  # Line too long (handled by formatter)
+
+[tool.ruff.lint.per-file-ignores]
+"tests/test_*.py" = ["E402"]  # pytest.importorskip gates optional Torch imports
+
+[tool.black]
+line-length = 100
+target-version = ["py312", "py313"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+pythonpath = ["."]
+addopts = "-v --tb=short -p no:hydra_pytest"

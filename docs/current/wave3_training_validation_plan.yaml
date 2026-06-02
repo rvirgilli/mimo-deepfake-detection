@@ -1,0 +1,262 @@
+schema_version: mimodf-training-validation-plan/v1
+plan_id: wave3_training_validation_plan_v1
+created: "2026-05-31"
+status: revised_after_wave3a_peft_maskgct_no_compute_authorized
+intent: >
+  Define Wave 3 as targeted trained validation after Wave 1 broad feature-probe
+  elimination and Wave 2 mechanism deepening. Cheap probes selected hypotheses;
+  Wave 3 must test whether those hypotheses survive real training, source shift,
+  and media shift.
+
+revision_2026_05_31:
+  trigger: >
+    Deterministic Wave 3A CoSG diagnostics, PEFT MASKGCT seed-stability,
+    batch-size review, feasibility smokes, and PEFT batch14 seed42 all-fold
+    pilot are complete. Frozen XLS-R backend is a three-seed batch4 diagnostic
+    baseline. PEFT batch2 is valid but protocol-confounded against frozen batch4.
+    PEFT batch14 seed42 is the strongest directional protocol so far, while
+    MASKGCT remains the worst-source threshold-collapse case.
+  current_plan_authority: docs/current/WAVE3_REVISED_PLAN_2026_05_31.md
+  current_working_thesis: >
+    Lightweight XLS-R adaptation can improve average held-out-generator transfer,
+    while source shift can still produce hidden worst-source operating-point
+    failures.
+  current_evidence_boundary:
+    - CoSG source-holdout is a custom diagnostic protocol, not official CodecFake+ benchmark training.
+    - frozen_xlsr_backend_batch4_complete_seeds: [42, 123, 2024]
+    - peft_xlsr_adapter_batch2_complete_seed42_all_folds: true
+    - peft_xlsr_adapter_batch2_maskgct_seed_stability_seeds: [42, 123, 2024]
+    - peft_xlsr_adapter_batch14_complete_seed42_all_folds: true
+    - maskgct_current_interpretation: mixed_ranking_stable_threshold_collapse_worst_source_risk
+    - matched_frozen_batch14_control: pending
+    - codecfake_cors_status: downloaded_not_extracted_or_indexed
+    - asvspoof5_status: not_staged_locally
+  immediate_next_action:
+    run_id_candidate: wave3a-frozen-batch14-seed42-allfolds-v1
+    condition: xlsr_frozen_backend
+    folds: all_cosg_source_holdout_folds
+    seeds: [42]
+    batch_size: 14
+    eval_batch_size: 14
+    epochs: 10
+    checkpoint_metric: val_auroc
+    deterministic: true
+    scope: matched_batch14_seed42_control_before_multi_seed_matrices
+  deferred_until_after_frozen_batch14_seed42_control:
+    - peft_batch14_allfold_seeds_123_2024
+    - frozen_batch14_allfold_seeds_123_2024
+    - full_xlsr_finetuning
+    - cors_proxy_training
+    - asvspoof5_training_or_eval
+    - media_augmented_peft
+
+principle_update:
+  old_default: no_training_by_default
+  new_default: >
+    No unmotivated broad training, no unbounded HPO, and no MiMo revival runs.
+    Targeted expensive training is now scientifically justified when tied to a
+    predeclared hypothesis, split, seed set, budget, and evaluation matrix.
+  rationale: >
+    Wave 1/2 evidence killed weak paths and selected XLS-R, source shift, media
+    shift, and CoRS/CoSG transfer as the strongest validation axes. Acceptance-level
+    claims require trained-model evidence, not only frozen probes.
+
+required_before_any_training:
+  - plan_and_execute_codecfake_cors_extraction_if_cors_is_used
+  - pin_cors_label_policy_if_used
+  - define_codec_fake_train_dev_test_splits
+  - implement_or_select_codecfake_training_dataloader
+  - implement_probe_or_backend_persistence_for_scoring
+  - make_transform_artifacts_durable_before_claim_bearing_eval
+  - create planned rows in docs/current/research_execution_log.jsonl before execution
+  - record git revision, command, environment, seeds, inputs, planned outputs, and stop rules
+
+research_questions:
+  - id: h1_probe_to_training_persistence
+    question: >
+      Do frozen feature-probe source failures predict failures of trained detectors,
+      or does training erase/amplify the same failure modes?
+    primary_models: [xlsr_frozen_backend, xlsr_peft_adapter, xlsr_full_finetune]
+    primary_shift_axes: [source_holdout]
+  - id: h2_finetuning_shortcut_risk
+    question: >
+      Does full fine-tuning improve average clean performance while worsening
+      source robustness compared with frozen-backend or PEFT training?
+    primary_models: [xlsr_frozen_backend, xlsr_peft_adapter, xlsr_full_finetune]
+    primary_shift_axes: [source_holdout, dataset_shift]
+  - id: h3_media_augmentation_robustness
+    question: >
+      Does media-augmented XLS-R PEFT preserve spoof margins and EER/AUROC under
+      compression, noise, and resampling better than clean-only XLS-R PEFT?
+    primary_models: [xlsr_peft_clean, xlsr_peft_media_augmented]
+    primary_shift_axes: [media_transform, source_holdout]
+  - id: h4_cors_proxy_transfer
+    question: >
+      Does CoRS proxy scale improve CoSG transfer, or does it teach shortcuts that
+      fail on generated codec-based speech?
+    primary_models: [xlsr_peft_cors_only, xlsr_peft_cors_pretrain_cosg_finetune, xlsr_peft_cosg_only]
+    primary_shift_axes: [dataset_shift, taxonomy_holdout, source_holdout]
+
+frontends_and_model_families:
+  - id: logmel_trained_baseline
+    role: low-cost trained acoustic baseline; sanity check for model capacity and transform sensitivity
+    priority: required_if_training_infra_supports_it
+  - id: xlsr_frozen_backend
+    component_family: ssl
+    role: trained backend over frozen reference representation
+    priority: required
+  - id: xlsr_peft_adapter
+    component_family: ssl
+    role: main trainable detector with bounded adaptation cost
+    priority: required
+  - id: xlsr_full_finetune
+    component_family: ssl
+    role: expensive upper/reference condition for training-vs-transfer behavior
+    priority: required_after_first_peft_run_is_healthy
+  - id: xlsr_peft_media_augmented
+    component_family: ssl
+    role: direct test of transform robustness intervention
+    priority: required_for_robustness_claims
+  - id: mimo_continuous_backend
+    component_family: tokenizer
+    role: diagnostic contrast only; not a MiMo-revival centerpiece
+    priority: optional_after_xlsr_reference
+  - id: wavlm_peft_adapter
+    component_family: ssl
+    role: optional rescue test for a weak frozen SSL comparator
+    priority: optional_low
+
+candidate_datasets:
+  - id: codecfake_cosg
+    status: ready_indexed
+    role: primary source-holdout and CoSG evaluation dataset
+    protocol: features/mimodf/wave0/codecfake_plus_protocol.jsonl
+    caveats:
+      - small support for several sources; report support-aware metrics and intervals
+  - id: codecfake_cors
+    status: downloaded_not_extracted
+    role: proxy-scale training or pretraining dataset
+    local_note: >
+      docs/current/CODECFAKE_CORS_AUDIT.md found all four archive parts and labels present
+      locally, but no extracted CoRS audio directory. Before training, plan extraction/storage,
+      verify readability, index audio, join taxonomy, and pin label policy.
+    caveats:
+      - CoRS is codec-resynthesized speech, not literal fake speech
+      - CoRS-as-spoof is a proxy policy and must be labeled as such in all reports
+  - id: durable_media_transform_cosg
+    status: needs_generation_or_promotion_from_smoke
+    role: clean/transformed robustness evaluation
+    caveats:
+      - /tmp smoke artifacts are not claim-bearing durable evidence
+      - transformed labels are inherited stress-test metadata, not new ground truth
+  - id: asvspoof5_or_safe_or_radar
+    status: blocked_or_future
+    role: external robustness/generalization validation if staged
+
+splits:
+  source_holdout:
+    policy: hold out all rows for each eligible CoSG source
+    minimum_support_guideline: at_least_10_bonafide_and_10_spoof_for_reporting
+    reporting: per_source_and_macro_average_with_support
+  train_dev_test:
+    policy: predeclare train/dev/test source groups before any training run
+    dev_policy: no test-source leakage into checkpoint selection
+  cors_to_cosg:
+    policy: train_or_pretrain_on_cors_proxy_then_evaluate_on_cosg_sources
+    label_policy_required: true
+
+seed_policy:
+  exploratory_training_signal: [42]
+  confirmatory_training: [42, 123, 2024]
+  rule: >
+    One seed may validate infrastructure and gross signal. Any claim about model
+    comparison requires all predeclared seeds or a logged failed/interrupted run.
+
+metrics:
+  primary:
+    - eer
+    - auroc
+    - balanced_accuracy
+    - false_positive_rate
+    - false_negative_rate
+  robustness:
+    - clean_to_transformed_score_delta
+    - margin_erosion
+    - score_correlation
+    - label_flip_count
+    - transform_specific_eer_delta_when_support_allows
+  uncertainty:
+    - bootstrap_confidence_intervals
+    - per_source_support_tables
+    - seed_mean_and_std_for_confirmatory_runs
+
+proposed_phases:
+  - phase_id: wave3a_official_proxy_training_reference
+    status: blocked_until_cors_extraction
+    purpose: establish official CodecFake+ proxy-training reference using CoRS official train/validation/eval, then CoSG transfer/eval
+    models: [xlsr_frozen_backend, xlsr_peft_adapter, xlsr_full_finetune]
+    datasets: [codecfake_cors, codecfake_cosg]
+    seeds: [42]
+    split_source: docs/current/CODECFAKE_OFFICIAL_SPLITS.md
+    promotion_rule: proceed_to_three_seeds_only_if_cors_audio_is_extracted_indexed_and_run_health_is_complete
+  - phase_id: wave3a_diagnostic_cosg_source_holdout
+    status: active_matched_batch14_control
+    purpose: diagnostic CoSG source-holdout training to validate trained-transfer and worst-source operating-point failures; not an official benchmark split
+    models: [xlsr_frozen_backend, xlsr_peft_adapter]
+    datasets: [codecfake_cosg]
+    completed_evidence:
+      frozen_backend_batch4_seeds: [42, 123, 2024]
+      peft_adapter_batch2_seed42_all_folds: true
+      peft_adapter_batch2_maskgct_seed_stability_seeds: [42, 123, 2024]
+      peft_adapter_batch14_seed42_all_folds: true
+      maskgct_current_interpretation: mixed_ranking_stable_threshold_collapse_worst_source_risk
+    immediate_next: xlsr_frozen_backend_batch14_seed42_all_folds
+    split_source: docs/current/wave3a_codecfake_cosg_source_holdout_plan_v3.json
+    promotion_rule: compare matched batch14 seed42 PEFT vs frozen before approving full batch14 multi-seed matrices
+  - phase_id: wave3b_media_augmented_training
+    status: planned
+    purpose: compare clean-only and media-augmented XLS-R PEFT under transform shift
+    models: [xlsr_peft_adapter, xlsr_peft_media_augmented]
+    datasets: [codecfake_cosg, durable_media_transform_cosg]
+    seeds: [42, 123, 2024]
+    prerequisite: wave3a_training_infra_and_xlsr_reference_complete
+  - phase_id: wave3c_cors_proxy_transfer
+    status: planned
+    purpose: test whether CoRS proxy scale transfers to CoSG or induces shortcuts
+    models: [xlsr_peft_cors_only, xlsr_peft_cors_pretrain_cosg_finetune, xlsr_peft_cosg_only]
+    datasets: [codecfake_cors, codecfake_cosg]
+    seeds: [42, 123, 2024]
+    prerequisite: codecfake_cors_audit_complete
+  - phase_id: wave3d_diagnostic_contrasts
+    status: optional
+    purpose: test whether MiMo or WavLM trained variants add insight after XLS-R reference is established
+    models: [mimo_continuous_backend, wavlm_peft_adapter]
+    prerequisite: named_prediction_from_wave3a_or_wave3b
+
+forbidden_without_new_approval:
+  - optuna_or_hpo
+  - broad_frontend_fishing
+  - full_asvspoof_la_df_eval
+  - claim_bearing_use_of_tmp_transform_artifacts
+  - silent_seed_or_source_exclusion
+  - presenting_new_reruns_as_missing_historical_artifacts
+
+first_doc_actions:
+  - close_wave2_with_docs/current/RESEARCH_WAVE_2_INTERIM_NOTE.md
+  - update representation_transfer_matrix.yaml with Wave 3 training rows
+  - update TASK_BOARD.md so T6 points to trained validation, not more CLAMTTS deepening
+  - audit CoRS local state and update dataset status before planning CoRS runs
+  - define docs/current/wave3a_xlsr_training_reference_spec.yaml as the first concrete trained-reference slice
+
+claim_policy:
+  allowed_after_plan_only:
+    - Wave 3 is planned as targeted trained validation; no compute has been run.
+  allowed_after_completed_single_seed:
+    - infrastructure and directional trained-model evidence, with no seed-general claim
+  allowed_after_completed_confirmatory_matrix:
+    - trained model comparisons across predeclared seeds/splits with caveats and intervals
+  not_allowed:
+    - training proves MiMo superiority
+    - frozen probes alone prove trained detector behavior
+    - feature drift alone proves robustness
+    - CoRS-as-spoof is literal fake speech

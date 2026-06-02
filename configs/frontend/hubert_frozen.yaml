@@ -1,0 +1,11 @@
+# @package _group_
+# HuBERT-Large frozen features
+# 315M params, 1024-dim output, ~50Hz
+# Pretrained with masked prediction over discrete k-means targets
+
+name: hubert
+sample_rate: 16000
+cut: 64600  # ~4 seconds at 16kHz (same as wav2vec2)
+
+model_name: facebook/hubert-large-ll60k
+freeze: true

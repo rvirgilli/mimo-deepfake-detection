@@ -1,0 +1,40 @@
+# @package _group_
+# Training hyperparameters
+
+# Optimization
+lr: 0.000001
+weight_decay: 0.0001
+num_epochs: 100
+
+# Discriminative learning rates (for fine-tuning large encoders like MiMo)
+# If encoder_lr is set, encoder uses encoder_lr while backend uses lr
+# This prevents destroying pretrained encoder representations
+encoder_lr: null  # null = use same lr as backend, otherwise set e.g. 1e-7
+
+# Layer-wise LR decay (optional, for more fine-grained control)
+layerwise_lr:
+  enabled: false
+  base_lr: 1e-5   # Base LR for top encoder layers
+  decay: 0.9      # Multiply by this for each layer going deeper
+
+# Early stopping
+patience: 3  # 0 = disabled, N = stop after N epochs without improvement
+
+# LR Scheduler
+scheduler:
+  enabled: true
+  type: plateau     # Options: cosine, plateau
+  # Cosine annealing params
+  T_max: 10         # Epochs for one cosine cycle (usually = num_epochs)
+  eta_min: 1e-7     # Minimum LR
+  # ReduceLROnPlateau params
+  factor: 0.5       # Multiply LR by this when reducing
+  plateau_patience: 2  # Epochs to wait before reducing
+
+# Loss function
+loss: weighted_CCE
+loss_weights: [0.1, 0.9]  # [spoof, bonafide]
+
+# CUDNN settings
+cudnn_deterministic: true
+cudnn_benchmark: false

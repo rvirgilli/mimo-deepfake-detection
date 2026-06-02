@@ -1,0 +1,181 @@
+schema_version: mimodf-deepening-wave-plan/v1
+plan_id: wave2_deepening_plan_v1
+created: "2026-05-30"
+status: closed_interim_wave3_handoff
+intent: >
+  Define Wave 2 as the first deepening wave after the broad exploratory Wave 1 map.
+  Wave 2 should test one named mechanism with sharper validation, not add more frontends
+  or run broad training.
+
+wave_semantics:
+  wave0: protocol/infrastructure/smokes
+  wave1: broad exploratory representation and shift map
+  wave2: first deepening wave on one surviving mechanism
+  immutable_provenance_note: >
+    Some completed exploratory runs have wave2-prefixed run IDs. Do not rename them.
+    Conceptually they are Wave 1 completion artifacts. Wave 2 work started from this plan and is now closed.
+
+wave1_closeout:
+  document: docs/current/RESEARCH_WAVE_1_CLOSEOUT.md
+  conclusion: >
+    XLS-R remains the strongest broad source-holdout reference. MiMo and WavLM are
+    source-conditional, especially around CLAMTTS. Log-mel is a useful sanity baseline
+    but not competitive broadly. Media-transform generation/log-mel drift is technically
+    validated but not a robustness metric.
+  no_real_training: true
+  training_note: >
+    Wave 1 used frozen feature caches plus sklearn linear probes. This is feature-probe
+    fitting, not frontend/backend training, not full fine-tuning, and not deployable model training.
+
+surviving_mechanisms:
+  - id: clamtts_reversal
+    priority: 1
+    question: Why do MiMo continuous and WavLM help CLAMTTS where XLS-R is weaker?
+    evidence:
+      - docs/current/RESEARCH_WAVE_1_RESULTS.md
+      - experiments/runs/wave1_feature_source_diagnostics_v1/report.md
+      - experiments/runs/wave2_wavlm_source_holdout_v1/report.md
+    allowed_next_validation:
+      - case-level overlap among XLS-R, WavLM, MiMo continuous, MiMo RVQ, and log-mel
+      - join errors to duration/source/taxonomy/audio metadata
+      - inspect score distributions and correctly/incorrectly reversed cases
+    not_allowed:
+      - training
+      - HPO
+      - adding a new frontend before naming a mechanism
+  - id: transform_frontend_specificity
+    priority: 2
+    question: Are media-transform drift patterns frontend-specific or just log-mel behavior?
+    evidence:
+      - docs/current/media_transform_smoke_plan.yaml
+      - /tmp/mimodf-media-transform-smoke-v1/logmel_drift_summary.json
+    allowed_next_validation:
+      - one bounded transformed-feature extraction for XLS-R on the existing 72 transformed rows
+      - paired clean/transformed XLS-R drift summary
+      - no classifier scoring unless probe persistence/scoring is implemented cleanly
+    not_allowed:
+      - full CoSG transformed features
+      - MiMo/WavLM transformed features before XLS-R transform smoke justifies cost
+      - robustness EER claim from the tiny smoke
+  - id: taxonomy_confounding
+    priority: 3
+    question: Are taxonomy random-split results source/content confounds?
+    allowed_next_validation:
+      - grouped/source-held-out taxonomy controls where support allows
+    not_allowed:
+      - taxonomy causality claims from random splits
+
+recommended_wave2_path:
+  path_id: wave2_clamtts_mechanism_v1
+  status: completed
+  reason: >
+    CLAMTTS is the only clear positive exception that survived multiple frontend comparisons.
+    It is cheaper and scientifically sharper to explain this reversal before broader robustness work.
+  primary_outputs:
+    - experiments/runs/wave2_clamtts_mechanism_v1/report.md
+    - experiments/runs/wave2_clamtts_mechanism_v1/summary.json
+  planned_inputs:
+    - experiments/runs/wave1_feature_probe_label_holdout_sources_v2/CLAMTTS/*/predictions.jsonl
+    - experiments/runs/wave2_feature_probe_label_holdout_sources_wavlm_base_plus_v1/CLAMTTS/wavlm_base_plus/predictions.jsonl
+    - experiments/runs/wave1_feature_probe_label_holdout_sources_logmel_v1/CLAMTTS/logmel_80_100hz/predictions.jsonl
+    - features/mimodf/wave0/codecfake_plus_protocol.jsonl
+  metrics_or_summaries:
+    - per-system wrong counts
+    - pairwise error overlap
+    - cases fixed by MiMo/WavLM relative to XLS-R
+    - cases uniquely failed by MiMo/WavLM
+    - score distribution by label and correctness group
+    - duration/source/taxonomy support summary
+  stop_rules:
+    - missing prediction files
+    - CLAMTTS support too small for the proposed breakdown
+    - result cannot name a mechanism beyond "model differs"
+  result:
+    run_id: wave2-clamtts-mechanism-v1
+    report: experiments/runs/wave2_clamtts_mechanism_v1/report.md
+    records: 119
+    support: {bonafide: 41, spoof: 78}
+    wrong_counts: {xlsr: 32, mimo_cont: 13, mimo_rvq_all: 17, wavlm: 30, logmel: 68}
+    key_pattern: >
+      MiMo continuous fixes 26 XLS-R errors and loses 7. MiMo RVQ all fixes 23 and loses 8.
+      WavLM fixes 14 and loses 12. Log-mel collapses on spoof recall with 67 spoof false negatives.
+    interpretation: >
+      CLAMTTS reversal is mainly a spoof-recall/false-negative reduction for MiMo continuous/RVQ,
+      not a duration-only effect or a simple acoustic log-mel effect.
+  followup_result:
+    run_id: wave2-clamtts-case-contrast-v1
+    report: experiments/runs/wave2_clamtts_case_contrast_v1/report.md
+    groups:
+      contrast_fixes_reference: {records: 26, labels: {bonafide: 7, spoof: 19}, mean_duration_sec: 4.741}
+      reference_fixes_contrast: {records: 7, labels: {bonafide: 1, spoof: 6}, mean_duration_sec: 3.258}
+    audio_pattern: >
+      MiMo-cont-fixes-XLS-R cases are longer, quieter, and have more near-silence than the reverse cases
+      in this CLAMTTS subset. This is a possible confound or part of the mechanism, not proof.
+    rvq_pattern: >
+      The fix group has higher mean RVQ entropy than the reverse group across early, late, and all RVQ;
+      late/all RVQ centroid contrast is stronger than early RVQ in this diagnostic.
+    interpretation: >
+      Current best hypothesis after CLAMTTS-only contrast was that MiMo is sensitive to a CLAMTTS spoof
+      artifact associated with lower-energy/more-silent and higher-token-diversity cases that XLS-R often
+      accepts as bonafide. NS2/NS3 validation below weakens this as a general mechanism.
+    source_validation:
+      run_id: wave2-clamtts-hypothesis-source-validation-v1
+      report: experiments/runs/wave2_clamtts_hypothesis_source_validation_v1/report.md
+      ns2:
+        records: 46
+        mimo_cont_fixes_xlsr: 0
+        xlsr_fixes_mimo_cont: 19
+        note: XLS-R fixes many MiMo spoof misses; high RVQ entropy appears in the reverse/failure group.
+      ns3:
+        records: 64
+        mimo_cont_fixes_xlsr: 4
+        xlsr_fixes_mimo_cont: 24
+        note: Few MiMo fixes, mostly bonafide; reverse group mostly spoof.
+      conclusion: >
+        The CLAMTTS low-energy/silence plus high-RVQ-entropy cue does not transfer as a MiMo-success
+        mechanism to NS2/NS3. Treat CLAMTTS as source-local until a sharper hypothesis predicts another
+        source or transform.
+  claim_weight: diagnostic_mechanism_only
+
+alternative_wave2_path:
+  path_id: wave2_xlsr_transform_drift_v1
+  reason: >
+    If media robustness is preferred before CLAMTTS mechanism work, run only XLS-R transformed-feature
+    drift on the existing 72 transformed rows to test frontend-specific drift. This remains smoke evidence.
+  required_approval: true
+  stop_after:
+    - XLS-R transformed feature extraction
+    - paired drift summary
+  not_allowed:
+    - classifier EER
+    - full transformed CoSG
+    - MiMo/WavLM transformed extraction
+
+forbidden_in_wave2_without_new_approval:
+  - full training
+  - Optuna/HPO
+  - full ASVspoof eval
+  - full transformed CoSG generation
+  - new broad frontend search
+  - paper table metrics
+
+xlsr_transform_drift_result:
+  feature_run_id: wave2-media-transform-smoke-xlsr-features-v1
+  drift_run_id: wave2-media-transform-smoke-xlsr-drift-v1
+  report: /tmp/mimodf-media-transform-smoke-v1/xlsr_drift_report.md
+  pairs: 72
+  by_transform:
+    mp3_64k_16k: {cosine_mean: 0.99798, l2_delta_mean: 0.265, mean_abs_delta_mean: 0.0038}
+    noise_snr20: {cosine_mean: 0.98071, l2_delta_mean: 1.028, mean_abs_delta_mean: 0.0149}
+    resample_8k_16k: {cosine_mean: 0.99462, l2_delta_mean: 0.490, mean_abs_delta_mean: 0.0070}
+  interpretation: >
+    XLS-R feature drift is largest for additive noise, then resampling, then MP3. This is paired feature
+    drift only, not classifier robustness. It suggests any robustness claim needs explicit probe scoring
+    or score-persistence infrastructure before EER-style transform metrics.
+
+next_action: >
+  Wave 2 is closed by docs/current/RESEARCH_WAVE_2_INTERIM_NOTE.md. Stop CLAMTTS-only deepening
+  unless a sharper, source-predictive mechanism is named. Stop transform robustness claims at drift
+  unless score persistence/scoring is implemented. Wave 3 should move to targeted trained validation
+  under docs/current/wave3_training_validation_plan.yaml: audit CoRS, build CodecFake training/scoring,
+  define specs/log rows, and run XLS-R trained-reference jobs only after explicit approval.

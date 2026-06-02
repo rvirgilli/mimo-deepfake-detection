@@ -1,0 +1,19 @@
+# @package _group_
+# HuBERT-Large with adapter fine-tuning
+# Same adapter config as wav2vec2 and MiMo for fair comparison
+
+name: hubert
+sample_rate: 16000
+cut: 64600  # ~4 seconds at 16kHz (same as wav2vec2)
+
+model_name: facebook/hubert-large-ll60k
+freeze: false  # adapters handle freezing internally
+
+finetune:
+  strategy: adapter
+
+  adapter:
+    dim: 64          # Bottleneck dimension (same as wav2vec2/MiMo)
+    dropout: 0.1     # Dropout rate
+    layers: last_n   # Which layers get adapters
+    n_layers: 8      # Number of layers (same as wav2vec2/MiMo)

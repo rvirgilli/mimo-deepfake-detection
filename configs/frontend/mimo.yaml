@@ -1,0 +1,104 @@
+# @package _group_
+# MiMo-Audio-Tokenizer frontend configuration
+# Requires Python 3.12 with flash-attn
+
+name: mimo
+sample_rate: 24000
+cut: 96000  # ~4 seconds at 24kHz
+
+# MiMo-specific settings
+model_path: ${oc.env:MIMO_TOKENIZER_MODEL,./models/MiMo-Audio-Tokenizer}
+use_bfloat16: true
+
+# Frame rate options (MiMo default: 25Hz, wav2vec2: 50Hz)
+# upsample_to_50hz: Enable upsampling 25Hz → 50Hz
+# upsample_mode: Method for upsampling (linear, nearest, learnable)
+#   - linear: Linear interpolation (simple, default)
+#   - nearest: Nearest neighbor (duplicates frames)
+#   - learnable: ConvTranspose1d with learnable kernel
+# native_50hz: Extract features before final downsampling (best quality, no artifacts)
+# NOTE: native_50hz takes precedence over upsample_to_50hz
+upsample_to_50hz: false
+upsample_mode: linear
+native_50hz: false
+
+# Feature extraction strategy
+# Options: continuous, rvq_sum, rvq_concat, rvq_fine, dual_stream, weighted, layer_select
+# - continuous: Pre-quantization hidden states (1280-dim, default)
+# - rvq_sum: Sum of all RVQ layer embeddings (1280-dim)
+# - rvq_concat: Concatenated RVQ embeddings from all layers (25,600-dim)
+# - rvq_fine: Fine-detail RVQ layers only, skip coarse semantic (configurable)
+# - dual_stream: Continuous + RVQ sum concatenated (2,560-dim)
+# - weighted: Learnable per-layer weights before summing (1280-dim)
+# - layer_select: Subset of transformer layers (1280-dim)
+feature:
+  type: continuous  # continuous is default for stable training
+
+  # Layer selection settings (used when type=layer_select)
+  # MiMo has 32 transformer layers
+  # NOTE: Layer selection experiments showed no improvement over continuous features
+  layer_select:
+    num_layers: 12     # Number of transformer layers to use
+    start_layer: 0     # First layer to use (must be 0 to preserve layer dependencies)
+
+  # RVQ fine settings (used when type=rvq_fine)
+  # Layers 0-1 = coarse semantic (1024 codebook)
+  # Layers 2-19 = fine acoustic details (128 codebook)
+  rvq_fine:
+    start_layer: 2   # First layer to include
+    end_layer: 8     # Last layer to include (inclusive)
+
+  # Weighted settings (used when type=weighted)
+  weighted:
+    n_q: 20          # Number of quantizer layers
+
+# Fine-tuning strategy for the MiMo tokenizer encoder
+# NOTE: The full tokenizer is reported as ~1.2B parameters; this project uses only
+# the encoder, whose trainable parameter count must be measured from the loaded model.
+# Options: frozen, full, adapter, lora, partial, gradual
+# - frozen: All encoder params frozen, only projection trains (~0.1M params)
+# - full: All encoder params trainable (requires very low LR)
+# - adapter: Bottleneck adapters after transformer layers (~2M params) [RECOMMENDED]
+# - lora: Low-rank adaptation of attention layers (~1M params)
+# - partial: Only last N transformer layers trainable (~150-600M params)
+# - gradual: Gradually unfreeze layers based on epoch schedule
+finetune:
+  strategy: adapter  # frozen, full, adapter, lora, partial, gradual
+
+  # Adapter settings (used when strategy=adapter)
+  adapter:
+    dim: 64              # Bottleneck dimension
+    dropout: 0.1         # Dropout rate
+    layers: last_n       # Which layers: all, last_n, every_n, first_n
+    n_layers: 8          # Number of layers for last_n/every_n/first_n
+
+  # LoRA settings (used when strategy=lora)
+  lora:
+    rank: 8              # Low-rank dimension
+    alpha: 16            # Scaling factor
+    dropout: 0.0         # Dropout rate
+    target_modules:      # Which linear layers to adapt
+      - q_proj
+      - v_proj
+
+  # Partial fine-tuning settings (used when strategy=partial)
+  partial:
+    n_trainable_layers: 4  # Number of last layers to train
+
+  # Gradual unfreezing settings (used when strategy=gradual)
+  # Progressively unfreezes layers from last to first based on epoch
+  gradual:
+    # Schedule: {epoch: n_layers_to_unfreeze}
+    # Default: start frozen, unfreeze last 4 at epoch 5, 8 at epoch 10, etc.
+    schedule:
+      0: 0      # Start with all frozen
+      5: 4      # Epoch 5: unfreeze last 4 layers
+      10: 8     # Epoch 10: unfreeze last 8 layers
+      15: 16    # Epoch 15: unfreeze last 16 layers
+      20: 32    # Epoch 20: unfreeze all 32 layers
+
+  # Layer-wise LR decay (can be used with full or partial)
+  layerwise_lr:
+    enabled: false       # Whether to use layer-wise LR decay
+    base_lr: 0.00001     # LR for last layer
+    decay: 0.9           # Decay factor per layer

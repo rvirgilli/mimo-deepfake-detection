@@ -1,0 +1,105 @@
+# Full fine-tuning strategy - standalone config
+# All MiMo tokenizer encoder parameters unfrozen (encoder-only count; not full tokenizer)
+# Based on Trial 39 hyperparameters
+
+seed: 42
+track: LA
+output_dir: ./experiments/finetune_comparison
+model_save_dir: ./experiments/finetune_comparison/models
+log_dir: ./experiments/finetune_comparison/logs
+eval_output_dir: ./experiments/finetune_comparison/scores
+experiment_name: finetune_full
+
+frontend:
+  name: mimo
+  sample_rate: 24000
+  cut: 96000
+  model_path: ${oc.env:MIMO_TOKENIZER_MODEL,./models/MiMo-Audio-Tokenizer}
+  use_bfloat16: true
+  upsample_to_50hz: false
+  upsample_mode: linear
+  native_50hz: true
+  feature:
+    type: continuous
+    layer_select:
+      num_layers: 12
+      start_layer: 0
+  freeze: false
+  finetune:
+    strategy: full
+
+dataset:
+  name: asvspoof
+  database_path: ${oc.env:ASVSPOOF_LA_DATABASE}
+  protocols_path: ${oc.env:ASVSPOOF_PROTOCOLS,./SSL_Anti-spoofing/database/}
+  batch_size: 14
+  num_workers: 8
+  eval_batch_size: 64
+
+training:
+  lr: 3.387990231321127e-05
+  weight_decay: 0.00012930039719879935
+  num_epochs: 20
+  encoder_lr: null
+  layerwise_lr:
+    enabled: false
+  patience: 5
+  scheduler:
+    enabled: true
+    type: plateau
+    factor: 0.5
+    plateau_patience: 2
+  loss: weighted_CCE
+  loss_weights:
+    - 0.33461891265935323
+    - 0.6653810873406467
+  cudnn_deterministic: true
+  cudnn_benchmark: false
+
+rawboost:
+  algo: 6
+  auto_scale: false
+  N_f: 5
+  nBands: 5
+  minF: 20
+  maxF: 11900
+  minBW: 100
+  maxBW: 1000
+  minCoeff: 10
+  maxCoeff: 100
+  minG: 0
+  maxG: 0
+  minBiasLinNonLin: 5
+  maxBiasLinNonLin: 20
+  P: 10
+  g_sd: 2
+  SNRmin: 10
+  SNRmax: 40
+
+model:
+  gat_dims:
+    - 128
+    - 48
+  pool_ratios:
+    - 0.7676008929764409
+    - 0.7676008929764409
+    - 0.7676008929764409
+    - 0.7676008929764409
+  temperatures:
+    - 2.0
+    - 2.0
+    - 100.0
+    - 100.0
+  dropout: 0.5380811810032032
+  dropout_way: 0.2770961155616896
+  dropout_input: 0.2
+  filts_0: 192
+  encoder_scale: 1.5
+  projection:
+    type: linear
+    hidden_dims:
+      - 512
+      - 256
+    activation: gelu
+    dropout: 0.1
+    use_batchnorm: true

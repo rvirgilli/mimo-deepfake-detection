@@ -1,0 +1,60 @@
+schema_version: experiment-spec/v1
+experiment_id: controlled_mimo_wav2vec2_v1
+intent: exploratory
+hypothesis: >
+  Under a controlled ASVspoof protocol, MiMo adapter behavior should be evaluated
+  against wav2vec2 with explicit batch-size, scoring, and checkpoint-selection facts.
+owner: local
+created: "2026-05-26"
+
+protocol:
+  train_dataset: dataset:asvspoof2019-la-train/v1
+  validation_dataset: dataset:asvspoof2019-la-dev/v1
+  checkpoint_selection: dev_eer
+  eval_datasets:
+    - dataset:asvspoof2021-la-eval/v1
+    - dataset:asvspoof2021-df-eval/v1
+  scorers:
+    la: scorer:asvspoof2021-la-official/v1
+    df: scorer:asvspoof-df-eer/v1
+  leakage_policy: no_eval_selection
+
+seeds: [42, 123, 456]
+
+model:
+  frontend: frontend:mimo-continuous-native50/v1
+  backend: backend:aasist/v1
+  projection:
+    type: linear
+    output_dim: 192
+  adaptation: adaptation:houlsby-adapter-last8/v1
+
+training:
+  max_epochs: 30
+  batch_size: 8
+  optimizer: optimizer:adam/v1
+  learning_rate: 0.000034
+  weight_decay: 0.0001
+  rawboost:
+    enabled: true
+    algorithm: 6
+  early_stop: null
+
+evaluation:
+  batch_size: 64
+  max_items: null
+  write_scores: true
+  official_scoring: true
+
+comparability:
+  group_id: controlled_mimo_wav2vec2_v1
+  allowed_comparisons:
+    - same_protocol
+    - same_seed_set
+    - same_eval_dataset
+  caveats:
+    - mimo_eval_batch_size_is_protocol_fact
+
+artifacts:
+  output_root: experiments/runs
+  publishable: false

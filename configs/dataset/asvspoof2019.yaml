@@ -1,0 +1,15 @@
+# @package _group_
+# ASVspoof 2019/2021 dataset configuration
+
+name: asvspoof
+
+# Dataset paths
+database_path: ${oc.env:ASVSPOOF_LA_DATABASE}
+protocols_path: ${oc.env:ASVSPOOF_PROTOCOLS,./SSL_Anti-spoofing/database/}
+
+# Data loading - batch_size for training (use larger for eval with --batch_size override)
+batch_size: 14
+num_workers: 8
+
+# Evaluation batch size (larger since no gradients needed)
+eval_batch_size: 64

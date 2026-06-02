@@ -1,0 +1,30 @@
+# Main configuration for mimo-deepfake-detection
+# Override with: python train.py frontend=mimo dataset=asvspoof2019
+
+defaults:
+  - frontend: wav2vec2
+  - dataset: asvspoof2019
+  - training: default
+  - rawboost: default
+  - model: default
+  - _self_
+
+# Experiment settings
+seed: 1234
+track: LA  # LA, PA, or DF
+
+# Output directories
+output_dir: ./experiments
+model_save_dir: ${output_dir}/models
+log_dir: ${output_dir}/logs
+eval_output_dir: ${output_dir}/scores
+
+# Experiment naming
+experiment_name: ${frontend.name}_${track}_${training.loss}
+
+# Model path for evaluation (override with model_path=/path/to/model.pth)
+model_path: null
+
+# Resume training from checkpoint (override with resume_from=/path/to/checkpoint.pth)
+resume_from: null
+start_epoch: 0

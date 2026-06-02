@@ -1,0 +1,205 @@
+schema_version: mimodf-codecfake-official-splits/v1
+created: '2026-05-31T05:17:00.379045-03:00'
+git_revision: 3b8b3ad4d1b4fc10f6ad3b2a359ceaaafdfc2c65
+literature_basis:
+  codecfake_plus_arxiv: https://arxiv.org/html/2501.08238
+  cors_split_rule: p226/p229 validation; p227/p228 Eval CoRS; remaining speakers train
+  cosg_role: web-sourced CoSG evaluation set; local CoSG_labels.txt has no official
+    train/validation split field
+  maskgct_note: paper mentions additional MaskGCT-VCTK train/validation/evaluation
+    sets, but no local split/protocol files were found in the staged CodecFake+ directory
+cors:
+  label_file: <datasets>/codecfake_plus/CoRS_labels.txt
+  rows: 1422560
+  split_counts:
+    evaluation:
+      bonafide: 755
+      spoof: 23405
+    train:
+      bonafide: 42965
+      spoof: 1331915
+    validation:
+      bonafide: 735
+      spoof: 22785
+  split_speaker_counts:
+    evaluation: 2
+    train: 106
+    validation: 2
+  split_speakers:
+    evaluation:
+    - p227
+    - p228
+    train:
+    - p225
+    - p230
+    - p231
+    - p232
+    - p233
+    - p234
+    - p236
+    - p237
+    - p238
+    - p239
+    - p240
+    - p241
+    - p243
+    - p244
+    - p245
+    - p246
+    - p247
+    - p248
+    - p249
+    - p250
+    - p251
+    - p252
+    - p253
+    - p254
+    - p255
+    - p256
+    - p257
+    - p258
+    - p259
+    - p260
+    - p261
+    - p262
+    - p263
+    - p264
+    - p265
+    - p266
+    - p267
+    - p268
+    - p269
+    - p270
+    - p271
+    - p272
+    - p273
+    - p274
+    - p275
+    - p276
+    - p277
+    - p278
+    - p279
+    - p280
+    - p281
+    - p282
+    - p283
+    - p284
+    - p285
+    - p286
+    - p287
+    - p288
+    - p292
+    - p293
+    - p294
+    - p295
+    - p297
+    - p298
+    - p299
+    - p300
+    - p301
+    - p302
+    - p303
+    - p304
+    - p305
+    - p306
+    - p307
+    - p308
+    - p310
+    - p311
+    - p312
+    - p313
+    - p314
+    - p315
+    - p316
+    - p317
+    - p318
+    - p323
+    - p326
+    - p329
+    - p330
+    - p333
+    - p334
+    - p335
+    - p336
+    - p339
+    - p340
+    - p341
+    - p343
+    - p345
+    - p347
+    - p351
+    - p360
+    - p361
+    - p362
+    - p363
+    - p364
+    - p374
+    - p376
+    - s5
+    validation:
+    - p226
+    - p229
+  audio_status: downloaded_archive_parts_not_extracted
+cosg:
+  label_file: <datasets>/codecfake_plus/CoSG_labels.txt
+  rows: 1797
+  role: evaluation_and_custom_diagnostic_source_holdout
+  official_split_field_present: false
+  source_counts:
+    CLAMTTS:
+      bonafide: 41
+      spoof: 78
+    ELLAV:
+      bonafide: 8
+      spoof: 8
+    GPST:
+      bonafide: 10
+      spoof: 30
+    MASKGCT:
+      bonafide: 576
+      spoof: 576
+    NS2:
+      bonafide: 23
+      spoof: 23
+    NS3:
+      bonafide: 32
+      spoof: 32
+    RALLE:
+      bonafide: 5
+      spoof: 5
+    SIMPLESPEECH1:
+      bonafide: 34
+      spoof: 32
+    SIMPLESPEECH2:
+      bonafide: 31
+      spoof: 31
+    SINGLECODEC:
+      bonafide: 8
+      spoof: 14
+    SPEECHX:
+      bonafide: 8
+      spoof: 8
+    TACOLM:
+      bonafide: 8
+      spoof: 8
+    TI1G1R:
+      bonafide: 6
+      spoof: 6
+    UNIAUDIO:
+      bonafide: 11
+      spoof: 11
+    USLM:
+      bonafide: 5
+      spoof: 5
+    VALLE:
+      bonafide: 53
+      spoof: 57
+    VIOLA:
+      bonafide: 7
+      spoof: 7
+decision:
+  primary_publishable_training_axis: CoRS official train/validation/eval -> CoSG transfer/eval,
+    after CoRS extraction
+  diagnostic_axis: CoSG custom source-holdout, not an official benchmark split
+  next_action: Update Wave 3 specs/docs to separate official/proxy and diagnostic
+    tracks.

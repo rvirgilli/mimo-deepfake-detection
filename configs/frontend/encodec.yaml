@@ -1,0 +1,14 @@
+# @package _group_
+# EnCodec frontend configuration
+# Meta's neural audio codec - reconstruction-based model
+
+name: encodec
+sample_rate: 24000
+cut: 96000  # ~4 seconds at 24kHz
+
+# EnCodec-specific settings
+model_name: facebook/encodec_24khz
+freeze: true  # Always frozen for this experiment
+
+# Output dim is 128 for encodec_24khz
+# Frame rate is ~75 Hz (24000 / 320 stride)

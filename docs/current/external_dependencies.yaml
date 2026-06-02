@@ -1,0 +1,66 @@
+dependencies:
+  - name: SSL_Anti-spoofing
+    path: SSL_Anti-spoofing
+    policy: local external clone; required for official LA scorer and Tak wav2vec2 recipe
+    expected_git_remote: https://github.com/TakHemlata/SSL_Anti-spoofing.git
+    expected_git_head: 4acaa61dcef5f7610f43aa4d0b29c4559b970cd2
+    setup:
+      - git clone https://github.com/TakHemlata/SSL_Anti-spoofing.git SSL_Anti-spoofing
+      - cd SSL_Anti-spoofing && git checkout 4acaa61dcef5f7610f43aa4d0b29c4559b970cd2
+      - place/download XLS-R checkpoint at SSL_Anti-spoofing/xlsr2_300m.pt
+    required_paths:
+      - path: evaluate_2021_LA.py
+        kind: file
+        expected_sha256: 04475cf8abe66a040866cdcd734f98e4547fd2cca020d7de78a9849c00ed424d
+      - path: eval_metric_LA.py
+        kind: file
+        expected_sha256: db993ad03a892d1eb50f5fdef83cf2ac1dc9a1960aa743cc1b307540d8fc1964
+      - path: RawBoost.py
+        kind: file
+        expected_sha256: 96b7e9050a01b8dd83de4daf97032586c5b86946c759ac06d06f82295ec67660
+      - path: xlsr2_300m.pt
+        kind: file
+        expected_sha256: b08927597f2c9eb2ebd7dcc3ac78ee4b5f6021cbac4b3a6c5a9deec445d80ed9
+    notes:
+      - Do not vendor blindly; clone/setup instructions or submodule pin required before external release.
+      - Official tDCF table values must come from evaluate_2021_LA.py output, not project result files.
+      - Local clone may be dirty because of fairseq cleanup; dirty state is audited and blocks turnkey release claims.
+
+  - name: MiMo-Audio-Tokenizer
+    path: MiMo-Audio-Tokenizer
+    policy: local external clone; required for MiMo frontend construction
+    expected_git_remote: https://github.com/XiaomiMiMo/MiMo-Audio-Tokenizer.git
+    expected_git_head: b62b59922979bf9f389b373169298a251587653f
+    setup:
+      - git clone https://github.com/XiaomiMiMo/MiMo-Audio-Tokenizer.git MiMo-Audio-Tokenizer
+      - cd MiMo-Audio-Tokenizer && git checkout b62b59922979bf9f389b373169298a251587653f
+      - install according to upstream pyproject/README in the experiment environment
+    required_paths:
+      - path: pyproject.toml
+        kind: file
+        expected_sha256: 9e29c1da0a249843ec83b41857d4c33fb19873866239bb29684e1daf520a4010
+      - path: mimo_audio_tokenizer/__init__.py
+        kind: file
+        expected_sha256: 9d156ce4b85c33d8cf1d58dac83dcb77fe1b07525ec47a0d57a723e5929e3c4f
+      - path: mimo_audio_tokenizer/model.py
+        kind: file
+        expected_sha256: e2aba0a4ef11a6b678872891a1adfa3caea2fd18bcaa11c0c929dc34a44330ff
+    notes:
+      - MiMo weights remain local artifacts under models/ or an explicit model path.
+      - Document exact weight source/checksum before claiming full rerun reproducibility.
+
+  - name: MiMo model weights
+    path: models/MiMo-Audio-Tokenizer
+    policy: local model artifact; not tracked in Git
+    setup:
+      - provide MiMo weights under models/MiMo-Audio-Tokenizer or set MIMO_TOKENIZER_MODEL
+    required_paths:
+      - path: config.json
+        kind: file
+        expected_sha256: 2a628686314c930a79fd421394600021599742ab9bc361094c4b0e50b3debef0
+      - path: model.safetensors
+        kind: file
+        expected_sha256: 2614f14d9d692bed0b695cc7283f8dd65c9beaf10376853c9b9888844745e847
+    notes:
+      - Presence is environment-specific; publish configs should reference this through MIMO_TOKENIZER_MODEL or CLI overrides.
+      - Add checksums once the release weight source is final.

@@ -1,0 +1,46 @@
+# @package _group_
+# RawBoost data augmentation configuration
+# Based on: Tak et al., ICASSP 2022
+#
+# Parameters are tuned for 16kHz audio (wav2vec2 baseline).
+# For higher sample rates (e.g., 24kHz for MiMo), set auto_scale: true
+# to automatically scale frequency-dependent parameters.
+
+# Algorithm selection
+# 0: No augmentation
+# 1: LnL_convolutive_noise
+# 2: ISD_additive_noise
+# 3: SSI_additive_noise
+# 4: series (1+2+3)
+# 5: series (1+2) - default in baseline
+# 6: series (1+3)
+# 7: series (2+3)
+# 8: parallel (1||2)
+algo: 5
+
+# Auto-scale frequency-dependent parameters for non-16kHz sample rates
+# When true: maxF, minBW, maxBW, minCoeff, maxCoeff are scaled by (sample_rate / 16000)
+# When false: use parameters as-is (for manual tuning or using pre-scaled configs)
+auto_scale: true
+
+# LnL_convolutive_noise parameters
+N_f: 5          # order of non-linearity
+nBands: 5       # number of notch filters
+minF: 20        # min centre frequency [Hz]
+maxF: 8000      # max centre frequency [Hz] - auto-adjusted for sample_rate
+minBW: 100      # min filter width [Hz]
+maxBW: 1000     # max filter width [Hz]
+minCoeff: 10    # min filter coefficients
+maxCoeff: 100   # max filter coefficients
+minG: 0         # min gain factor
+maxG: 0         # max gain factor
+minBiasLinNonLin: 5   # min gain diff linear/non-linear
+maxBiasLinNonLin: 20  # max gain diff linear/non-linear
+
+# ISD_additive_noise parameters
+P: 10           # max uniform distributed samples [%]
+g_sd: 2         # gain parameter
+
+# SSI_additive_noise parameters
+SNRmin: 10      # min SNR for additive noise
+SNRmax: 40      # max SNR for additive noise

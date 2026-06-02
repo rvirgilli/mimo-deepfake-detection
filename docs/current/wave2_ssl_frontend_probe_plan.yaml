@@ -1,0 +1,207 @@
+schema_version: wave2-ssl-frontend-probe-plan/v1
+plan_id: wave2_ssl_frontend_probe_wavlm_base_plus_v1
+created: "2026-05-28"
+status: full_probe_completed_negative_conditional
+intent: diagnostic
+approval_state: design_only_no_compute_authorized
+
+question: >
+  Is the Wave 1 wav2vec2/XLSR advantage under CodecFake+ CoSG source holdout
+  a generic SSL speech-encoder effect, or specific to the XLS-R checkpoint?
+
+selected_frontend:
+  id: wavlm_base_plus
+  family: ssl
+  component_id: frontend:wavlm-base-plus/hf-b211941/v1
+  source: huggingface
+  model_id: microsoft/wavlm-base-plus
+  revision: b21194173c0af7e94822c1776d162e2659fd4761
+  license_status: check_before_download_or_public_release
+  expected_sample_rate_hz: 16000
+  expected_representation: last_hidden_state_framewise
+  planned_value_kind: continuous
+  planned_frame_rate_hz: approximately_50
+  planned_hidden_size: 768
+  runtime: transformers
+  planned_loader: AutoFeatureExtractor plus WavLMModel or AutoModel
+  implemented_cli: python -m mimodf features wavlm-smoke-extract
+  source_evidence:
+    - https://huggingface.co/microsoft/wavlm-base-plus
+    - https://huggingface.co/microsoft/wavlm-base-plus/tree/b21194173c0af7e94822c1776d162e2659fd4761
+  rationale:
+    - Public 16 kHz SSL speech encoder with feature-extraction use.
+    - Not ASR-finetuned, so it is a cleaner representation-transfer contrast than an ASR fine-tuned HuBERT checkpoint.
+    - Base-plus size is a cheaper first diagnostic than large SSL models.
+    - Tests whether the SSL-vs-tokenizer Wave 1 conclusion survives a different SSL architecture/training recipe.
+
+discarded_first_candidates:
+  - id: hubert_large_ls960_ft
+    model_id: facebook/hubert-large-ls960-ft
+    reason: >
+      ASR-finetuned and large; useful later, but a less clean first diagnostic for
+      generic frozen SSL representation transfer.
+  - id: wavlm_large
+    model_id: microsoft/wavlm-large
+    reason: >
+      More comparable parameter count to XLS-R, but higher extraction cost; defer
+      until the base-plus diagnostic is useful.
+
+inputs:
+  protocol: features/mimodf/wave0/codecfake_plus_protocol.jsonl
+  dataset_subset: CodecFake+ CoSG indexed rows with existing audio_path files
+  wave1_reference_features:
+    - features/mimodf/wave1/codecfake_cosg_wav2vec2_xlsr_b1
+    - features/mimodf/wave1/codecfake_cosg_mimo_continuous_25hz_b1
+    - features/mimodf/wave1/codecfake_cosg_mimo_rvq_all_b1
+  wave1_reference_reports:
+    - docs/current/RESEARCH_WAVE_1_RESULTS.md
+    - docs/current/RESEARCH_WAVE_1_NEGATIVE_NOTE.md
+
+planned_outputs:
+  smoke_feature_dir: /tmp/mimodf-wave2-wavlm-base-plus-smoke
+  full_feature_dir: features/mimodf/wave2/codecfake_cosg_wavlm_base_plus_b1
+  probe_root: experiments/runs/wave2_feature_probe_label_holdout_sources_wavlm_base_plus_v1
+  comparison_report: experiments/runs/wave2_ssl_frontend_probe_wavlm_base_plus_v1/report.md
+
+protocol:
+  extraction:
+    batch_size: 1
+    sample_rate_hz: 16000
+    device_policy: cpu_or_single_gpu_explicit_in_log
+    max_items_smoke: 8
+    full_items_expected: 1797
+    no_training: true
+    cache_manifest_required: true
+    command_argv_required: true
+    git_revision_required: true
+  probe:
+    task: label
+    split: holdout-values
+    holdout_field: source_model
+    seed: 42
+    backend: same_as_wave1_probe_backend
+    pooling: continuous_mean_std
+    sources:
+      - MASKGCT
+      - CLAMTTS
+      - VALLE
+      - SIMPLESPEECH1
+      - NS3
+      - SIMPLESPEECH2
+      - NS2
+      - GPST
+      - UNIAUDIO
+    metrics:
+      - eer
+      - auroc
+      - balanced_accuracy
+      - macro_f1
+
+required_implementation_before_execution:
+  - Keep the manifest schema compatible with existing feature probes.
+  - Do not add classifier training or full ASVspoof eval.
+  - Log the smoke before executing it.
+  - Log full extraction/probes before executing them.
+
+implemented_smoke_path:
+  smoke_cli: python -m mimodf features wavlm-smoke-extract
+  full_cli: python -m mimodf features wavlm-extract
+  source_module: mimodf/features/wavlm.py
+  smoke_max_items_cap: 16
+  manifest_schema: mimodf-feature-manifest/v1
+  record_schema: mimodf-feature-record/v1
+  example_command: >
+    python -m mimodf features wavlm-smoke-extract --protocol features/mimodf/wave0/codecfake_plus_protocol.jsonl
+    --out-dir /tmp/mimodf-wave2-wavlm-base-plus-smoke --max-items 8 --batch-size 1 --device cpu
+
+smoke_result:
+  run_id: wave2-wavlm-base-plus-smoke-v1
+  status: completed
+  output_dir: /tmp/mimodf-wave2-wavlm-base-plus-smoke
+  records: 8
+  array_files: 8
+  observed_shapes:
+    - [269, 768]
+    - [770, 768]
+    - [134, 768]
+    - [83, 768]
+    - [115, 768]
+    - [106, 768]
+    - [101, 768]
+    - [64, 768]
+  caveat: >
+    The first 8 usable protocol rows are all CLAMTTS spoof, so this is only a technical
+    manifest/shape smoke, not balanced data evidence.
+
+full_probe_result:
+  extraction_run_id: wave2-codecfake-cosg-wavlm-base-plus-b1-v2
+  summary_run_id: wave2-wavlm-source-holdout-summary-v1
+  status: completed
+  feature_dir: features/mimodf/wave2/codecfake_cosg_wavlm_base_plus_b1
+  probe_root: experiments/runs/wave2_feature_probe_label_holdout_sources_wavlm_base_plus_v1
+  report: experiments/runs/wave2_wavlm_source_holdout_v1/report.md
+  records: 1797
+  mean_eer: 0.324
+  mean_balanced_accuracy: 0.660
+  mean_auroc: 0.715
+  best_by_eer_count: 0/9
+  beats_xlsr_on:
+    - CLAMTTS
+  interpretation: >
+    WavLM-Base+ does not reproduce XLS-R's broad source-holdout strength. The SSL advantage
+    observed in Wave 1 is not generic to this WavLM checkpoint.
+
+balanced_smoke_result:
+  protocol_run_id: wave2-balanced-smoke-protocol-v1
+  wavlm_run_id: wave2-wavlm-base-plus-balanced-smoke-v1
+  status: completed
+  protocol_path: /tmp/codecfake_cosg_balanced_smoke_v1.jsonl
+  output_dir: /tmp/mimodf-wave2-wavlm-base-plus-balanced-smoke
+  records: 16
+  array_files: 16
+  labels:
+    bonafide: 9
+    spoof: 7
+  source_groups: 12
+  observed_shapes:
+    - [203, 768]
+    - [304, 768]
+    - [250, 768]
+    - [166, 768]
+    - [224, 768]
+    - [318, 768]
+    - [149, 768]
+    - [373, 768]
+    - [163, 768]
+    - [149, 768]
+    - [80, 768]
+    - [221, 768]
+    - [174, 768]
+    - [138, 768]
+    - [248, 768]
+    - [137, 768]
+  caveat: >
+    This is still only a smoke artifact, not metric evidence. It improves technical coverage
+    by mixing labels and source models before any full CoSG extraction decision.
+
+interpretation_rules:
+  ssl_general_if:
+    - WavLM-Base+ is close to or better than XLS-R on most held-out sources.
+    - CLAMTTS remains the main exception or is also fixed by WavLM without harming NS2/NS3.
+  checkpoint_specific_if:
+    - WavLM-Base+ materially changes the source ranking versus XLS-R.
+    - WavLM fixes CLAMTTS while XLS-R does not, weakening the tokenizer-specific CLAMTTS hypothesis.
+  tokenizer_conditional_strengthened_if:
+    - WavLM behaves like XLS-R on NS2/NS3/UNIAUDIO but still loses CLAMTTS to MiMo continuous.
+  stop_if:
+    - Smoke extraction cannot produce framewise arrays and a manifest from 8 examples.
+    - Required model/license/download metadata cannot be pinned.
+    - Extraction requires unbounded memory/runtime or a broad dependency rewrite.
+    - Results only improve random row splits and not grouped source holdout.
+
+not_authorized_by_this_plan:
+  - full training
+  - Optuna or HPO
+  - ASVspoof LA/DF full evaluation
+  - broad frontend matrix expansion
+  - paper claim updates without logged results

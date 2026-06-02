@@ -1,0 +1,38 @@
+# @package _group_
+# RawBoost data augmentation configuration for 24kHz (MiMo)
+#
+# Scaled from 16kHz baseline by factor of 1.5 (24000/16000)
+# Key changes:
+# - maxF extended to use full 24kHz spectrum (Nyquist = 12kHz)
+# - Filter bandwidths scaled proportionally
+# - Filter coefficients scaled for same frequency resolution
+#
+# Based on: Tak et al., ICASSP 2022
+
+# Algorithm selection (same as 16kHz)
+algo: 5
+
+# Pre-scaled config - disable auto-scaling
+auto_scale: false
+
+# LnL_convolutive_noise parameters (SCALED for 24kHz)
+N_f: 5              # order of non-linearity (unchanged)
+nBands: 5           # number of notch filters (unchanged)
+minF: 20            # min centre frequency [Hz] (unchanged - low freq)
+maxF: 11900         # max centre frequency [Hz] - extended for 24kHz Nyquist
+minBW: 150          # min filter width [Hz] - scaled 1.5x from 100
+maxBW: 1500         # max filter width [Hz] - scaled 1.5x from 1000
+minCoeff: 15        # min filter coefficients - scaled 1.5x from 10
+maxCoeff: 150       # max filter coefficients - scaled 1.5x from 100
+minG: 0             # min gain factor (unchanged)
+maxG: 0             # max gain factor (unchanged)
+minBiasLinNonLin: 5     # min gain diff linear/non-linear (unchanged)
+maxBiasLinNonLin: 20    # max gain diff linear/non-linear (unchanged)
+
+# ISD_additive_noise parameters (unchanged - percentage based)
+P: 10               # max uniform distributed samples [%]
+g_sd: 2             # gain parameter
+
+# SSI_additive_noise parameters (unchanged - SNR based)
+SNRmin: 10          # min SNR for additive noise
+SNRmax: 40          # max SNR for additive noise

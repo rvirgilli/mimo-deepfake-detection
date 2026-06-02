@@ -1,0 +1,336 @@
+schema_version: representation-transfer-matrix/v1
+matrix_id: representation_transfer_shift_map_v1
+intent: diagnostic
+owner: local
+created: "2026-05-27"
+purpose: >
+  Track the exploratory representation-transfer map, completed deepening paths,
+  and planned trained-validation paths. MiMo is one candidate frontend, not the
+  organizing goal. This matrix does not authorize compute by itself; training
+  requires explicit Wave 3 specs, planned log rows, and approval.
+wave_label_note: >
+  Some immutable run IDs use a wave2 prefix, but WavLM/log-mel/media-transform work is
+  treated as exploratory Wave 1 completion in RESEARCH_WAVE_1_CLOSEOUT.md. Wave 2 is the
+  completed CLAMTTS deepening wave. Wave 3 is planned trained validation in
+  wave3_training_validation_plan.yaml.
+
+frontends:
+  - id: wav2vec2_xlsr
+    component_id: frontend:wav2vec2-xlsr-300m/v1
+    family: ssl
+    status: ready
+    purpose: Established SSL baseline already staged locally through XLS-R features.
+    current_artifacts:
+      - features/mimodf/wave1/codecfake_cosg_wav2vec2_xlsr_b1
+  - id: mimo_continuous
+    component_id: frontend:mimo-audio-tokenizer-continuous/local
+    family: tokenizer
+    status: ready
+    purpose: Tokenizer encoder continuous features; useful as a generation-oriented contrast.
+    current_artifacts:
+      - features/mimodf/wave1/codecfake_cosg_mimo_continuous_25hz_b1
+    caveats:
+      - MiMo batch size is a protocol fact; current feature caches use extraction batch size 1.
+  - id: mimo_rvq
+    component_id: frontend:mimo-audio-tokenizer-rvq/local
+    family: tokenizer
+    status: ready
+    purpose: Discrete tokenizer-code features for semantic/acoustic ablation diagnostics.
+    current_artifacts:
+      - features/mimodf/wave1/codecfake_cosg_mimo_rvq_early_b1
+      - features/mimodf/wave1/codecfake_cosg_mimo_rvq_late_b1
+      - features/mimodf/wave1/codecfake_cosg_mimo_rvq_all_b1
+    caveats:
+      - Current RVQ unigram histograms are weak on held-out CoSG source transfer.
+  - id: wavlm_base_plus
+    component_id: frontend:wavlm-base-plus/hf-b211941/v1
+    family: ssl
+    status: ready
+    purpose: Test whether Wave 1 results are specific to XLS-R or general to another public SSL speech encoder.
+    current_artifacts:
+      - features/mimodf/wave2/codecfake_cosg_wavlm_base_plus_b1
+    current_plan:
+      - docs/current/wave2_ssl_frontend_probe_plan.yaml
+    caveats:
+      - Full feature extraction and held-out-source probes are complete; no training or ASVspoof eval was run.
+  - id: codec_tokenizer_baseline
+    component_id: frontend:codec-tokenizer-candidate/local
+    family: codec
+    status: planned
+    purpose: Test whether simpler codec/tokenizer features reproduce or replace MiMo's conditional signal.
+    prerequisites:
+      - Choose EnCodec/SoundStream-style representation only if tied to codec/transform shifts.
+  - id: logmel_baseline
+    component_id: frontend:logmel-meanstd/v1
+    family: acoustic
+    status: ready
+    purpose: Sanity-check whether representation results exceed a boring acoustic baseline.
+    current_artifacts:
+      - features/mimodf/wave1/codecfake_cosg_logmel_80_100hz
+    caveats:
+      - Boring 80-bin log-mel frame features; source-holdout probes use mean/std pooling.
+
+datasets:
+  - id: codecfake_cosg
+    purpose: Small generator/source/taxonomy-rich dataset already staged and indexed.
+    status: ready
+    artifacts:
+      - features/mimodf/wave0/codecfake_plus_protocol.jsonl
+  - id: codecfake_cors_subset
+    purpose: Larger codec-resynthesis subset for source/codec scale if CoRS download/extraction completes.
+    status: blocked
+    blockers:
+      - CoRS archive parts and labels are present, but audio is not extracted/indexed.
+      - CoRS taxonomy mapping and CoRS-as-spoof labeling policy need explicit caveats.
+  - id: self_media_transform_cosg
+    purpose: Controlled compression/resampling/noise transforms from CoSG to test robustness shift.
+    status: planned
+    prerequisites:
+      - Define transform recipes and label policy before generating audio.
+  - id: asvspoof5_or_public_robustness
+    purpose: External robustness/generalization dataset if available locally or publicly staged.
+    status: blocked
+    blockers:
+      - Not staged locally; download/registration cost unknown.
+
+shift_axes:
+  - id: source_holdout
+    purpose: Hold out generator/source model families to test transfer under source shift.
+  - id: taxonomy_holdout
+    purpose: Hold out codec/taxonomy factors where support allows.
+  - id: media_transform
+    purpose: Apply compression/resampling/noise/laundering transforms to test robustness.
+  - id: dataset_shift
+    purpose: Train/probe on one dataset family and evaluate on another.
+  - id: representation_ablation
+    purpose: Compare continuous, early-token, late-token, and all-token representations.
+
+rows:
+  - row_id: wave1_closed_codecfake_cosg_source_holdout
+    kind: analysis
+    status: completed
+    dataset: codecfake_cosg
+    shift_axis: source_holdout
+    frontends: [wav2vec2_xlsr, mimo_continuous, mimo_rvq]
+    question: What did Wave 1 already show under source holdout?
+    metrics: [eer, auroc, balanced_accuracy, macro_f1, error_overlap]
+    approval_required: false
+    result: >
+      wav2vec2/XLSR wins 8/9 held-out CoSG sources by EER; MiMo continuous wins CLAMTTS only;
+      fusion is partially complementary but unstable.
+    evidence:
+      - docs/current/RESEARCH_WAVE_1_RESULTS.md
+      - docs/current/research_execution_log.jsonl
+  - row_id: wave2_design_source_holdout_ssl_candidate
+    kind: feature_probe
+    status: completed
+    dataset: codecfake_cosg
+    shift_axis: source_holdout
+    frontends: [wav2vec2_xlsr, wavlm_base_plus, mimo_continuous, mimo_rvq, logmel_baseline]
+    question: Is XLS-R's advantage a generic SSL effect or checkpoint-specific?
+    metrics: [eer, auroc, balanced_accuracy, macro_f1]
+    approval_required: false
+    result: >
+      WavLM-Base+ full CoSG extraction and nine held-out-source probes completed. Mean EER is 0.324
+      across the Wave 1 comparison sources; WavLM beats XLS-R only on CLAMTTS and is best on 0/9
+      sources in the four-way XLS-R/MiMo-cont/MiMo-RVQ/WavLM comparison.
+    evidence:
+      - experiments/runs/wave2_wavlm_source_holdout_v1/report.md
+      - docs/current/research_execution_log.jsonl
+  - row_id: wave1_logmel_source_holdout_baseline_v1
+    kind: feature_probe
+    status: completed
+    dataset: codecfake_cosg
+    shift_axis: source_holdout
+    frontends: [logmel_baseline, wav2vec2_xlsr, wavlm_base_plus, mimo_continuous, mimo_rvq]
+    question: Does a boring acoustic baseline explain the source-holdout signal?
+    metrics: [eer, auroc, balanced_accuracy]
+    approval_required: false
+    result: >
+      Log-mel mean/std baseline completed over the same nine held-out sources. Mean EER is 0.362;
+      it is best on SIMPLESPEECH1 only and does not challenge XLS-R's broad transfer strength.
+    evidence:
+      - experiments/runs/wave1_logmel_source_holdout_v1/report.md
+      - docs/current/research_execution_log.jsonl
+  - row_id: wave1_source_diagnostics_clamtts_ns_v1
+    kind: analysis
+    status: completed
+    dataset: codecfake_cosg
+    shift_axis: source_holdout
+    frontends: [wav2vec2_xlsr, mimo_continuous, mimo_rvq]
+    question: Why does MiMo help CLAMTTS but fail NS2/NS3/UNIAUDIO?
+    metrics: [error_overlap, per_label_error, duration_support]
+    approval_required: false
+    result: >
+      CLAMTTS is a source-specific error reversal: MiMo continuous fixes 26 SSL mistakes and loses 7 cases,
+      but on NS2/NS3/UNIAUDIO SSL fixes far more MiMo-continuous mistakes than the reverse. Similar mean
+      durations across sources do not explain the effect.
+    evidence:
+      - experiments/runs/wave1_feature_source_diagnostics_v1/report.md
+      - docs/current/research_execution_log.jsonl
+  - row_id: wave2_clamtts_mechanism_v1
+    kind: analysis
+    status: completed
+    dataset: codecfake_cosg
+    shift_axis: source_holdout
+    frontends: [wav2vec2_xlsr, wavlm_base_plus, mimo_continuous, mimo_rvq, logmel_baseline]
+    question: What case-level pattern explains the CLAMTTS reversal?
+    metrics: [error_overlap, false_negative, false_positive, score_distribution, duration_support]
+    approval_required: false
+    result: >
+      CLAMTTS reversal is mainly a spoof false-negative reduction for MiMo continuous/RVQ. MiMo continuous
+      has 13 wrong cases versus XLS-R's 32, fixes 26 XLS-R errors, and loses 7. WavLM fixes 14 and loses
+      12 relative to XLS-R. Log-mel has 68 wrong cases, mostly spoof false negatives, so the effect is not
+      a simple acoustic log-mel cue.
+    evidence:
+      - experiments/runs/wave2_clamtts_mechanism_v1/report.md
+      - docs/current/research_execution_log.jsonl
+  - row_id: wave2_clamtts_case_contrast_v1
+    kind: analysis
+    status: completed
+    dataset: codecfake_cosg
+    shift_axis: source_holdout
+    frontends: [wav2vec2_xlsr, wavlm_base_plus, mimo_continuous, mimo_rvq, logmel_baseline]
+    question: What differs between MiMo-cont-fixes-XLS-R cases and reverse cases on CLAMTTS?
+    metrics: [score_distribution, duration_support, audio_rms, silence_fraction, feature_centroid_distance, rvq_entropy]
+    approval_required: false
+    result: >
+      MiMo-cont-fixes-XLS-R cases are mostly spoof (19/26), longer, quieter, more silent, and have higher
+      RVQ entropy than the reverse 7-case group. Late/all RVQ centroid contrast is stronger than early RVQ.
+      This suggests a CLAMTTS artifact associated with low-energy/silence and token diversity, but remains
+      diagnostic and CLAMTTS-local until tested on another source or transform.
+    evidence:
+      - experiments/runs/wave2_clamtts_case_contrast_v1/report.md
+      - docs/current/research_execution_log.jsonl
+  - row_id: wave2_clamtts_hypothesis_source_validation_v1
+    kind: analysis
+    status: completed
+    dataset: codecfake_cosg
+    shift_axis: source_holdout
+    frontends: [wav2vec2_xlsr, mimo_continuous, mimo_rvq, wavlm_base_plus, logmel_baseline]
+    question: Does the CLAMTTS low-energy/silence/RVQ-entropy hypothesis predict NS2/NS3 behavior?
+    metrics: [error_overlap, duration_support, audio_rms, silence_fraction, rvq_entropy]
+    approval_required: false
+    result: >
+      No. NS2 has zero MiMo-cont fixes over XLS-R and 19 XLS-R-fixes-MiMo cases, mostly spoof.
+      NS3 has only 4 MiMo fixes and 24 reverse cases. Higher RVQ entropy appears in NS2 reverse/failure
+      cases, opposite the CLAMTTS success pattern. Treat CLAMTTS as source-local until a sharper mechanism
+      predicts another source or transform.
+    evidence:
+      - experiments/runs/wave2_clamtts_hypothesis_source_validation_v1/report.md
+      - docs/current/research_execution_log.jsonl
+  - row_id: wave2_design_media_transform_smoke
+    kind: indexing
+    status: planned
+    dataset: self_media_transform_cosg
+    shift_axis: media_transform
+    frontends: [wav2vec2_xlsr, mimo_continuous, mimo_rvq, logmel_baseline]
+    question: Which frontend family is most stable under compression/resampling/noise transforms?
+    metrics: [eer_delta, auroc_delta, score_correlation, false_reject_rate]
+    approval_required: true
+    current_plan:
+      - docs/current/media_transform_smoke_plan.yaml
+    current_artifacts:
+      - /tmp/mimodf-media-transform-smoke-v1/clean_sample.jsonl
+      - /tmp/mimodf-media-transform-smoke-v1/transformed_protocol.jsonl
+      - /tmp/mimodf-media-transform-smoke-v1/manifest.json
+      - /tmp/mimodf-media-transform-smoke-v1/logmel_features
+      - /tmp/mimodf-media-transform-smoke-v1/logmel_drift_summary.json
+      - /tmp/mimodf-media-transform-smoke-v1/xlsr_features
+      - /tmp/mimodf-media-transform-smoke-v1/xlsr_drift_summary.json
+    result: >
+      Transform generation plus log-mel and XLS-R paired feature drift completed for 24 clean rows x 3
+      transforms. Log-mel drift is small for mp3_64k_16k (cosine mean 0.99996, L2 mean 4.17) and larger
+      for noise_snr20 (0.99155, 125.73) and resample_8k_16k (0.99024, 73.58). XLS-R drift is largest
+      for noise_snr20 (0.98071, 1.028), then resample_8k_16k (0.99462, 0.490), then mp3_64k_16k
+      (0.99798, 0.265). No classifier scoring, EER, or robustness claim was computed.
+    prerequisites:
+      - Do not treat transformed inherited labels as new ground truth.
+      - Extract stronger transformed frontends only with a new logged mechanism-specific reason.
+  - row_id: wave2_design_codec_tokenizer_baseline
+    kind: feature_probe
+    status: blocked
+    dataset: codecfake_cosg
+    shift_axis: representation_ablation
+    frontends: [codec_tokenizer_baseline, mimo_rvq, wav2vec2_xlsr]
+    question: Are MiMo RVQ findings specific to MiMo or generic to codec-tokenizer codes?
+    metrics: [eer, auroc, balanced_accuracy, taxonomy_macro_f1]
+    approval_required: false
+    blockers:
+      - Codec/tokenizer baseline not selected or staged.
+      - Should not proceed unless tied to media/codec shift question.
+  - row_id: wave2_design_cors_scale_check
+    kind: feature_probe
+    status: blocked
+    dataset: codecfake_cors_subset
+    shift_axis: taxonomy_holdout
+    frontends: [wav2vec2_xlsr, mimo_continuous, mimo_rvq]
+    question: Do CoSG source-holdout patterns persist at CoRS scale?
+    metrics: [eer, auroc, balanced_accuracy, source_macro_f1]
+    approval_required: true
+    blockers:
+      - CoRS audio must be extracted, indexed, and readability-checked.
+      - CoRS taxonomy mapping and CoRS-as-spoof policy not pinned.
+  - row_id: wave3_xlsr_training_reference
+    kind: training
+    status: planned
+    dataset: codecfake_cosg
+    shift_axis: source_holdout
+    frontends: [wav2vec2_xlsr]
+    question: Under a custom CoSG diagnostic source-holdout protocol, do XLS-R frozen-backend, PEFT, and full fine-tune preserve or change frozen-probe source-failure maps?
+    metrics: [eer, auroc, balanced_accuracy, false_positive_rate, false_negative_rate]
+    approval_required: true
+    current_plan:
+      - docs/current/wave3_training_validation_plan.yaml
+      - docs/current/wave3a_xlsr_training_reference_spec.yaml
+      - docs/current/CODECFAKE_OFFICIAL_SPLITS.md
+    prerequisites:
+      - CodecFake training path selected or implemented.
+      - Deterministic source-holdout fold builder implemented.
+      - Train-pool validation policy finalized.
+      - Planned research-log rows created before execution.
+  - row_id: wave3_media_augmented_xlsr_training
+    kind: training
+    status: planned
+    dataset: self_media_transform_cosg
+    shift_axis: media_transform
+    frontends: [wav2vec2_xlsr]
+    question: Does media-augmented XLS-R PEFT preserve scores/margins under MP3/noise/resampling better than clean-only PEFT?
+    metrics: [eer_delta, auroc_delta, score_correlation, clean_to_transformed_score_delta, margin_erosion, label_flip_count]
+    approval_required: true
+    current_plan:
+      - docs/current/wave3_training_validation_plan.yaml
+    prerequisites:
+      - Durable transformed evaluation artifacts, not /tmp smoke outputs.
+      - Model/probe/backend persistence and scoring infrastructure.
+  - row_id: wave3_cors_proxy_transfer
+    kind: training
+    status: blocked
+    dataset: codecfake_cors_subset
+    shift_axis: dataset_shift
+    frontends: [wav2vec2_xlsr]
+    question: Does CoRS proxy scale improve CoSG transfer or induce shortcuts that fail on generated speech?
+    metrics: [eer, auroc, balanced_accuracy, taxonomy_macro_f1, source_macro_f1]
+    approval_required: true
+    current_plan:
+      - docs/current/wave3_training_validation_plan.yaml
+    blockers:
+      - CoRS audio is downloaded but not extracted/indexed/readability-checked.
+      - CoRS-as-spoof proxy label policy not pinned.
+
+decision_policy:
+  promote_if:
+    - A representation family wins under at least one declared shift and the effect survives grouped controls.
+    - A failure mode is consistent enough to predict where a frontend will fail.
+    - Fusion improves a primary metric without worsening basic error balance across sources.
+  kill_if:
+    - Gains appear only in random row splits or low-support sources.
+    - A frontend loses under grouped controls and offers no complementary errors.
+    - A proposed baseline does not test a declared shift or failure mode.
+
+next_recommended_action: >
+  Do not run unmotivated broad training. WavLM-Base+ and log-mel do not reproduce XLS-R broad
+  source-holdout strength. Wave 2 source validation weakened the CLAMTTS-local hypothesis, and
+  bounded XLS-R transform-drift smoke is complete without classifier scoring. Wave 3 should now
+  prepare targeted trained validation: audit CoRS, build CodecFake training/scoring infrastructure,
+  create concrete specs/log rows, and run XLS-R trained-reference jobs only after explicit approval.

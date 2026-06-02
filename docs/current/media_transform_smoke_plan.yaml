@@ -1,0 +1,224 @@
+schema_version: mimodf-media-transform-smoke-plan/v1
+plan_id: wave2_media_transform_smoke_v1
+created: "2026-05-30"
+status: logmel_and_xlsr_feature_drift_completed
+scope: tiny_technical_and_directional_smoke
+intent: >
+  Complete the broad exploratory map by testing whether frontend evidence is brittle under
+  simple media transformations. This plan defines the smoke only; it does not authorize
+  transformed-audio generation, feature extraction, or probe scoring by itself.
+
+non_goals:
+  - no full CoSG transform generation
+  - no training or HPO
+  - no ASVspoof/LA/DF evaluation
+  - no paper robustness claim
+  - no CoRS relabeling
+  - no transformed audio committed to git
+
+local_tool_preflight:
+  checked_at: "2026-05-30"
+  ffmpeg:
+    available: true
+    path: /usr/bin/ffmpeg
+    version_prefix: "ffmpeg version 6.1.1-3ubuntu5"
+  sox:
+    available: false
+  opusenc:
+    available: false
+  lame:
+    available: false
+  decision: Use ffmpeg-only recipes for the first smoke.
+
+input_dataset:
+  id: codecfake_cosg
+  protocol: features/mimodf/wave0/codecfake_plus_protocol.jsonl
+  role: clean source audio for paired media-transform smoke
+
+sample_policy:
+  run_id_to_create_sample: wave2-media-transform-smoke-sample-v1
+  output_protocol: /tmp/mimodf-media-transform-smoke-v1/clean_sample.jsonl
+  max_records: 24
+  group_by: [label, source_model]
+  max_per_group: 1
+  seed: 42
+  rationale: >
+    Keep the smoke small but cover labels and as many source groups as possible. This is
+    technical/directional evidence, not enough for robustness metrics.
+
+transform_output_policy:
+  root: /tmp/mimodf-media-transform-smoke-v1
+  transformed_protocol: /tmp/mimodf-media-transform-smoke-v1/transformed_protocol.jsonl
+  manifest: /tmp/mimodf-media-transform-smoke-v1/manifest.json
+  per_file_manifest_jsonl: /tmp/mimodf-media-transform-smoke-v1/transform_records.jsonl
+  commit_outputs: false
+  overwrite_default: false
+  expected_files_per_input: 3
+  expected_total_transformed_files: 72
+
+label_policy:
+  inherited_label_field: original_label
+  transformed_label_field: label
+  rule: >
+    Transformed audio inherits the original bonafide/spoof label only for stress-test
+    bookkeeping. It is not new ground truth and must not be mixed into training/eval claims
+    without an explicit dataset policy.
+  caveats:
+    - Media transforms can alter artifact evidence without changing semantic class.
+    - Bonafide compressed audio is not spoof.
+    - Directional score/feature drift is safer than binary accuracy claims at smoke size.
+
+transforms:
+  - id: resample_8k_16k
+    family: resampling
+    tool: ffmpeg
+    command_template: >
+      ffmpeg -nostdin -hide_banner -loglevel error -y -i {input} -ac 1 -ar 8000
+      /tmp/{stem}.8k.wav && ffmpeg -nostdin -hide_banner -loglevel error -y -i
+      /tmp/{stem}.8k.wav -ac 1 -ar 16000 {output}
+    output_suffix: resample_8k_16k.wav
+    expected_format: wav_pcm_16k_mono
+    rationale: SAFE/RADAR-style down/up resampling stress without codec dependency.
+  - id: mp3_64k_16k
+    family: lossy_codec
+    tool: ffmpeg
+    command_template: >
+      ffmpeg -nostdin -hide_banner -loglevel error -y -i {input} -ac 1 -ar 16000
+      -codec:a libmp3lame -b:a 64k /tmp/{stem}.mp3 && ffmpeg -nostdin -hide_banner
+      -loglevel error -y -i /tmp/{stem}.mp3 -ac 1 -ar 16000 {output}
+    output_suffix: mp3_64k_16k.wav
+    expected_format: decoded_wav_pcm_16k_mono
+    rationale: Common lossy compression/laundering stress, decoded back to WAV for frontend CLIs.
+  - id: noise_snr20
+    family: additive_noise
+    tool: python
+    command_template: >
+      python -m mimodf transforms add-noise --input {input} --output {output}
+      --sample-rate 16000 --snr-db 20 --seed {seed}
+    output_suffix: noise_snr20.wav
+    expected_format: wav_pcm_16k_mono
+    rationale: Mild reproducible additive-noise stress. Requires a tiny transform CLI before execution.
+
+execution_phases:
+  - phase: sample_protocol
+    status: completed
+    approval_required: true
+    command: >
+      python -m mimodf data sample-protocol --input features/mimodf/wave0/codecfake_plus_protocol.jsonl
+      --out /tmp/mimodf-media-transform-smoke-v1/clean_sample.jsonl --group-by label source_model
+      --max-per-group 1 --max-records 24 --seed 42 --summary-out /tmp/mimodf-media-transform-smoke-v1/sample_summary.json
+      --format json
+    expected_outputs:
+      - /tmp/mimodf-media-transform-smoke-v1/clean_sample.jsonl
+      - /tmp/mimodf-media-transform-smoke-v1/sample_summary.json
+    result:
+      run_id: wave2-media-transform-smoke-sample-v1
+      records_written: 24
+      labels: {bonafide: 13, spoof: 11}
+      groups_written: 24
+  - phase: generate_transforms
+    status: completed
+    approval_required: true
+    implementation:
+      - python -m mimodf transforms media-smoke
+      - python -m mimodf transforms add-noise
+      - deterministic transform runner writes transformed_protocol.jsonl and transform_records.jsonl
+      - input/output SHA-256 hashes
+      - duration/sample-rate verification
+      - no overwrite unless logged
+    expected_outputs:
+      - /tmp/mimodf-media-transform-smoke-v1/transformed_protocol.jsonl
+      - /tmp/mimodf-media-transform-smoke-v1/transform_records.jsonl
+      - /tmp/mimodf-media-transform-smoke-v1/manifest.json
+    result:
+      failed_attempt: wave2-media-transform-smoke-generate-v1
+      completed_run: wave2-media-transform-smoke-generate-v2
+      input_records: 24
+      transformed_records: 72
+      transforms: [resample_8k_16k, mp3_64k_16k, noise_snr20]
+      caveat: generated audio is local under /tmp and remains technical smoke evidence only
+  - phase: technical_feature_smoke
+    status: completed_for_logmel
+    approval_required: true
+    mandatory_frontends: [logmel_baseline]
+    optional_frontends_if_runtime_ok: [wav2vec2_xlsr, mimo_continuous]
+    not_first_smoke: [wavlm_base_plus, mimo_rvq]
+    rationale: >
+      First verify transform and feature-read paths cheaply. Do not run every expensive frontend
+      until the transformed protocol is known good.
+    result:
+      run_id: wave2-media-transform-smoke-logmel-features-v1
+      frontend: logmel_80_100hz
+      records: 72
+      arrays: 72
+  - phase: scoring_or_drift
+    status: completed_for_logmel_drift
+    approval_required: true
+    options:
+      - name: feature_drift_only
+        description: Pair clean/transformed pooled feature vectors and report cosine similarity/L2 drift.
+        claim_weight: technical_directional
+      - name: trained_probe_score_delta
+        description: Persist/reload train-only logistic probes or add a probe-score CLI, then score transformed pairs.
+        claim_weight: directional_metric_smoke
+        implementation_needed: true
+    decision: Do feature-drift first unless probe-score persistence is implemented cleanly.
+    result:
+      run_id: wave2-media-transform-smoke-logmel-drift-v1
+      pairs: 72
+      by_transform:
+        mp3_64k_16k: {cosine_mean: 0.99996, l2_delta_mean: 4.17, mean_abs_delta_mean: 0.15}
+        noise_snr20: {cosine_mean: 0.99155, l2_delta_mean: 125.73, mean_abs_delta_mean: 8.89}
+        resample_8k_16k: {cosine_mean: 0.99024, l2_delta_mean: 73.58, mean_abs_delta_mean: 2.62}
+      caveat: no classifier scoring or binary robustness metric was computed
+    xlsr_result:
+      feature_run_id: wave2-media-transform-smoke-xlsr-features-v1
+      drift_run_id: wave2-media-transform-smoke-xlsr-drift-v1
+      pairs: 72
+      by_transform:
+        mp3_64k_16k: {cosine_mean: 0.99798, l2_delta_mean: 0.265, mean_abs_delta_mean: 0.0038}
+        noise_snr20: {cosine_mean: 0.98071, l2_delta_mean: 1.028, mean_abs_delta_mean: 0.0149}
+        resample_8k_16k: {cosine_mean: 0.99462, l2_delta_mean: 0.490, mean_abs_delta_mean: 0.0070}
+      caveat: no classifier scoring or binary robustness metric was computed
+
+validation_checks:
+  - clean sample has expected record count and mixed label/source coverage
+  - transformed file count equals clean_count * transform_count
+  - every transform record has input_path, output_path, transform_id, command, tool_version, sha256_input, sha256_output
+  - every output is readable audio with expected sample rate and nonzero duration
+  - transformed protocol preserves original utterance/source metadata plus transform metadata
+  - feature extraction writes manifest/records with expected counts
+  - no metric table is updated from smoke-only evidence
+
+stop_rules:
+  - ffmpeg transform fails for any input without a recorded failed run
+  - output count mismatch
+  - unreadable audio or zero-duration output
+  - label policy ambiguity blocks interpretation
+  - transform runner would overwrite existing outputs without explicit logged overwrite reason
+  - implementation requires broad GPU/full frontend extraction beyond smoke scope
+
+success_criteria:
+  technical_success:
+    - 24 clean rows sampled
+    - 72 transformed WAV files generated under /tmp
+    - transform manifest/protocol validates counts and hashes
+    - log-mel feature extraction succeeds on all transformed rows
+  directional_success:
+    - at least one frontend shows measurable paired drift differences by transform family
+    - result motivates a named deeper robustness hypothesis
+  not_success:
+    - any binary EER/accuracy value from this smoke alone
+    - any robustness claim beyond technical/directional evidence
+
+planned_run_ids:
+  - wave2-media-transform-smoke-sample-v1
+  - wave2-media-transform-smoke-generate-v1
+  - wave2-media-transform-smoke-logmel-features-v1
+  - wave2-media-transform-smoke-drift-summary-v1
+
+next_decision: >
+  Log-mel and XLS-R transform-drift paths validate cleanly. Wave 3 makes robustness a trained-validation
+  axis, so implement model/probe/backend persistence and clean/transformed scoring before any EER-style
+  transform claim. Promote transform artifacts out of /tmp or regenerate them durably before claim-bearing
+  evaluation. Drift-only smoke remains directional evidence.

@@ -1,0 +1,81 @@
+version: 1
+policy: official_asvspoof_la_only
+rows:
+  - row_id: wav2vec2_frozen
+    reported_mean: 0.3844
+    display: "0.384"
+    status: valid_same_seed_set
+    note: Same five local seeds as EER.
+    values:
+      - {seed: 42, tdcf: 0.3867, source: experiments/paper_final/tdcf_recomputed.txt}
+      - {seed: 123, tdcf: 0.3980, source: experiments/paper_final/tdcf_recomputed.txt}
+      - {seed: 456, tdcf: 0.4037, source: experiments/paper_final/tdcf_recomputed.txt}
+      - {seed: 789, tdcf: 0.3545, source: experiments/paper_final/tdcf_recomputed.txt}
+      - {seed: 1234, tdcf: 0.3791, source: experiments/paper_final/tdcf_recomputed.txt}
+
+  - row_id: wav2vec2_adapter
+    reported_mean: 0.2553
+    display: "0.255"
+    status: corrected_same_seed_set
+    note: Paper 0.251 used only four paper_final seeds; include seed1234 to match EER n=5.
+    values:
+      - {seed: 42, tdcf: 0.2707, source: experiments/paper_final/tdcf_recomputed.txt}
+      - {seed: 123, tdcf: 0.2458, source: experiments/paper_final/tdcf_recomputed.txt}
+      - {seed: 456, tdcf: 0.2582, source: experiments/paper_final/tdcf_recomputed.txt}
+      - {seed: 789, tdcf: 0.2284, source: experiments/paper_final/tdcf_recomputed.txt}
+      - {seed: 1234, tdcf: 0.2733, source: audit command with SSL_Anti-spoofing/evaluate_2021_LA.py}
+
+  - row_id: wav2vec2_full_local
+    reported_mean: 0.2149
+    display: "0.215"
+    status: valid_local_n3
+    note: Valid for local n=3 only; Tak external EER point has no local tDCF.
+    values:
+      - {seed: 42, tdcf: 0.2157, source: experiments/paper_final/tdcf_recomputed.txt}
+      - {seed: 123, tdcf: 0.2127, source: experiments/paper_final/tdcf_recomputed.txt}
+      - {seed: 1234, tdcf: 0.2164, source: experiments/paper_final/tdcf_recomputed.txt}
+
+  - row_id: mimo_frozen
+    reported_mean: 0.3605
+    display: "0.361*"
+    status: partial_tdcf_n4
+    note: EER row has five found evals; tDCF has four local score files because seed1234 score is missing.
+    values:
+      - {seed: 42, tdcf: 0.3550, source: experiments/paper_final/tdcf_recomputed.txt}
+      - {seed: 123, tdcf: 0.3282, source: experiments/paper_final/tdcf_recomputed.txt}
+      - {seed: 456, tdcf: 0.4294, source: experiments/paper_final/tdcf_recomputed.txt}
+      - {seed: 789, tdcf: 0.3296, source: experiments/paper_final/tdcf_recomputed.txt}
+
+  - row_id: mimo_adapter
+    reported_mean: 0.2973
+    display: "0.297"
+    status: valid_found_n2
+    note: Valid for found n=2 exploratory row only; paper n=5 row unsupported.
+    values:
+      - {seed: trial39_42ish, tdcf: 0.2979, source: audit command with SSL_Anti-spoofing/evaluate_2021_LA.py}
+      - {seed: 2024, tdcf: 0.2966, source: audit command with SSL_Anti-spoofing/evaluate_2021_LA.py}
+
+  - row_id: mimo_full
+    reported_mean: 0.3496
+    display: "0.350"
+    status: corrected_same_seed_set
+    note: Paper 0.338 used only four local seeds; include seed1234 to match EER n=5.
+    values:
+      - {seed: 42, tdcf: 0.2823, source: experiments/paper_final/tdcf_recomputed.txt}
+      - {seed: 123, tdcf: 0.3094, source: experiments/paper_final/tdcf_recomputed.txt}
+      - {seed: 456, tdcf: 0.3886, source: experiments/paper_final/tdcf_recomputed.txt}
+      - {seed: 789, tdcf: 0.3718, source: experiments/paper_final/tdcf_recomputed.txt}
+      - {seed: 1234, tdcf: 0.3957, source: audit command with SSL_Anti-spoofing/evaluate_2021_LA.py}
+wrong_scale_examples:
+  - path: experiments/paper_final/wav2vec2_adapter_multiseed/seed_42/eval/results_LA_eval.txt
+    project_min_tdcf: 0.0073
+    official_min_tdcf: 0.2707
+  - path: experiments/paper_final/mimo_frozen_multiseed/seed_42/eval/results_LA_eval.txt
+    project_min_tdcf: 0.0153
+    official_min_tdcf: 0.3550
+  - path: experiments/paper_final/mimo_full_multiseed/seed_42/eval/results_LA_eval.txt
+    project_min_tdcf: 0.0093
+    official_min_tdcf: 0.2823
+  - path: experiments/eval_2021_v2/results_LA_eval.txt
+    project_min_tdcf: 0.0098
+    official_min_tdcf: 0.2979

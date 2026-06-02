@@ -1,0 +1,22 @@
+# @package _group_
+# wav2vec2 XLSR with adapter fine-tuning
+# Fair comparison with MiMo adapter (~1.3M trainable params each)
+# Requires Python 3.10 with fairseq
+
+name: wav2vec2
+sample_rate: 16000
+cut: 64600  # ~4 seconds at 16kHz
+
+# wav2vec2-specific settings
+checkpoint: ${oc.env:WAV2VEC2_XLSR_CHECKPOINT,./SSL_Anti-spoofing/xlsr2_300m.pt}
+freeze: false  # adapters handle freezing internally
+
+# Fine-tuning strategy (matches MiMo adapter config for fair comparison)
+finetune:
+  strategy: adapter
+
+  adapter:
+    dim: 64          # Bottleneck dimension (same as MiMo)
+    dropout: 0.1     # Dropout rate (same as MiMo)
+    layers: last_n   # Which layers get adapters
+    n_layers: 8      # Number of layers (same as MiMo)

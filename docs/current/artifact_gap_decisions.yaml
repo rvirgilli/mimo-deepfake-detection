@@ -1,0 +1,80 @@
+version: 1
+policy: Known historical artifact gaps are explicit exceptions for audit/system packaging only. They do not make the affected rows fully reproducible and must not be used to claim turnkey reproduction.
+gaps:
+  - row_id: wav2vec2_adapter
+    seed_id: "42"
+    kind: checkpoint
+    value: experiments/paper_final/wav2vec2_adapter_multiseed/seed_42/models/w2v2_adapter_s42_seed42/epoch_5_eer_5.85.pth
+    decision: known_missing_score_only
+    reason: Result-cited checkpoint is absent; score/result files and non-best local checkpoint remain.
+    action: Recover cited checkpoint if full rerun provenance is required; otherwise report row as partial.
+  - row_id: wav2vec2_adapter
+    seed_id: "789"
+    kind: checkpoint
+    value: experiments/paper_final/wav2vec2_adapter_multiseed/seed_789/models/w2v2_adapter_s789_seed789/epoch_17_eer_6.51.pth
+    decision: known_missing_score_only
+    reason: Result-cited checkpoint is absent; score/result files and non-best local checkpoint remain.
+    action: Recover cited checkpoint if full rerun provenance is required; otherwise report row as partial.
+  - row_id: wav2vec2_full_local
+    seed_id: "42"
+    kind: config
+    value: local_private/.../run_w2v_fullft.sh
+    decision: private_local_script
+    reason: Historical orchestration script was moved out of the public branch with other local-only materials.
+    action: Keep private locally; publish only sanitized protocol summaries.
+  - row_id: wav2vec2_full_local
+    seed_id: "123"
+    kind: config
+    value: local_private/.../run_w2v_fullft.sh
+    decision: private_local_script
+    reason: Historical orchestration script was moved out of the public branch with other local-only materials.
+    action: Keep private locally; publish only sanitized protocol summaries.
+  - row_id: mimo_frozen
+    seed_id: "123"
+    kind: checkpoint
+    value: experiments/paper_final/mimo_frozen_multiseed/seed_123/models/mimo_frozen_s123_seed123/epoch_6_eer_10.85.pth
+    decision: known_missing_score_only
+    reason: Result-cited checkpoint is absent; score/result files and non-best local checkpoint remain.
+    action: Recover cited checkpoint if full rerun provenance is required; otherwise report row as partial.
+  - row_id: mimo_frozen
+    seed_id: "789"
+    kind: checkpoint
+    value: experiments/paper_final/mimo_frozen_multiseed/seed_789/models/mimo_frozen_s789_seed789/epoch_5_eer_10.63.pth
+    decision: known_missing_score_only
+    reason: Result-cited checkpoint is absent; score/result files and non-best local checkpoint remain.
+    action: Recover cited checkpoint if full rerun provenance is required; otherwise report row as partial.
+  - row_id: mimo_frozen
+    seed_id: "1234"
+    kind: checkpoint
+    value: outputs/2026-02-08/02-05-01/.../epoch_1_eer_9.78.pth
+    decision: known_missing_external_output
+    reason: External/original output directory is not locally available; EER result files exist but same-set LA score for official tDCF is unavailable.
+    action: Recover output directory and LA score file if same-set tDCF/full provenance is required.
+  - row_id: mimo_adapter
+    seed_id: "2024"
+    kind: checkpoint
+    value: outputs/2026-01-27/18-01-37/.../epoch_4_eer_9.87.pth
+    decision: known_missing_external_output
+    reason: Output directory is not locally available; score/result files support only exploratory n=2 metrics.
+    action: Recover output directory or rerun controlled adapter seed only with explicit approval.
+  - row_id: mimo_full
+    seed_id: "42"
+    kind: checkpoint
+    value: experiments/paper_final/mimo_full_multiseed/seed_42/models/mimo_full_s42_seed42/epoch_12_eer_9.87.pth
+    decision: known_missing_score_only
+    reason: Result-cited checkpoint is absent; score/result files and adjacent local checkpoint remain.
+    action: Recover cited checkpoint if full rerun provenance is required; otherwise report row as partial.
+  - row_id: mimo_full
+    seed_id: "789"
+    kind: checkpoint
+    value: experiments/paper_final/mimo_full_multiseed/seed_789/models/mimo_full_s789_seed789/epoch_1_eer_11.84.pth
+    decision: known_manifest_checkpoint_mismatch
+    reason: Manifest records best epoch 1 but local result artifact uses epoch 0; result-cited epoch 1 checkpoint is absent.
+    action: Explain mismatch or recover epoch 1 checkpoint before full reproducibility claims.
+  - row_id: mimo_full
+    seed_id: "1234"
+    kind: checkpoint
+    value: outputs/2026-02-08/05-20-18/.../epoch_1_eer_13.34.pth
+    decision: known_missing_external_output
+    reason: External/original output directory is not locally available; score/result files support corrected metrics only.
+    action: Recover output directory if full rerun provenance is required.

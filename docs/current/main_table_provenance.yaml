@@ -1,0 +1,400 @@
+version: 1
+policy:
+  eer_std: sample
+  tdcf_source: official_asvspoof_la_only
+  tdcf_seed_set_rule: must_match_eer_or_explain
+rows:
+- id: wav2vec2_frozen
+  model: wav2vec2
+  strategy: Frozen
+  n_source: 5 local
+  status: partial
+  notes: Metric artifacts complete; configs/manifests missing.
+  seeds:
+  - id: 42
+    source: local
+    status: partial
+    metrics:
+      la_eer: 8.21
+      la_tdcf: 0.3867
+      df_eer: 6.79
+    artifacts:
+      la_score: experiments/paper_final/wav2vec2_frozen_multiseed/seed_42/eval/scores_LA_eval.txt
+      la_result: experiments/paper_final/wav2vec2_frozen_multiseed/seed_42/eval/results_LA_eval.txt
+      config: missing
+      checkpoint: experiments/paper_final/wav2vec2_frozen_multiseed/seed_42/best_model.pt
+      df_score: experiments/paper_final/wav2vec2_frozen_multiseed/seed_42/eval/scores_DF_eval.txt
+      df_result: experiments/paper_final/wav2vec2_frozen_multiseed/seed_42/eval/results_DF_eval.txt
+  - id: 123
+    source: local
+    status: partial
+    metrics:
+      la_eer: 8.4
+      la_tdcf: 0.398
+      df_eer: 7.4
+    artifacts:
+      la_score: experiments/paper_final/wav2vec2_frozen_multiseed/seed_123/eval/scores_LA_eval.txt
+      la_result: experiments/paper_final/wav2vec2_frozen_multiseed/seed_123/eval/results_LA_eval.txt
+      config: missing
+      checkpoint: experiments/paper_final/wav2vec2_frozen_multiseed/seed_123/best_model.pt
+      df_score: experiments/paper_final/wav2vec2_frozen_multiseed/seed_123/eval/scores_DF_eval.txt
+      df_result: experiments/paper_final/wav2vec2_frozen_multiseed/seed_123/eval/results_DF_eval.txt
+  - id: 456
+    source: local
+    status: partial
+    metrics:
+      la_eer: 8.79
+      la_tdcf: 0.4037
+      df_eer: 6.6
+    artifacts:
+      la_score: experiments/paper_final/wav2vec2_frozen_multiseed/seed_456/eval/scores_LA_eval.txt
+      la_result: experiments/paper_final/wav2vec2_frozen_multiseed/seed_456/eval/results_LA_eval.txt
+      config: missing
+      checkpoint: experiments/paper_final/wav2vec2_frozen_multiseed/seed_456/best_model.pt
+      df_score: experiments/paper_final/wav2vec2_frozen_multiseed/seed_456/eval/scores_DF_eval.txt
+      df_result: experiments/paper_final/wav2vec2_frozen_multiseed/seed_456/eval/results_DF_eval.txt
+  - id: 789
+    source: local
+    status: partial
+    metrics:
+      la_eer: 6.85
+      la_tdcf: 0.3545
+      df_eer: 5.82
+    artifacts:
+      la_score: experiments/paper_final/wav2vec2_frozen_multiseed/seed_789/eval/scores_LA_eval.txt
+      la_result: experiments/paper_final/wav2vec2_frozen_multiseed/seed_789/eval/results_LA_eval.txt
+      config: missing
+      checkpoint: experiments/paper_final/wav2vec2_frozen_multiseed/seed_789/best_model.pt
+      df_score: experiments/paper_final/wav2vec2_frozen_multiseed/seed_789/eval/scores_DF_eval.txt
+      df_result: experiments/paper_final/wav2vec2_frozen_multiseed/seed_789/eval/results_DF_eval.txt
+  - id: 1234
+    source: local
+    status: partial
+    metrics:
+      la_eer: 7.98
+      la_tdcf: 0.3791
+      df_eer: 7.18
+    artifacts:
+      la_score: experiments/paper_final/wav2vec2_frozen_multiseed/seed_1234/eval/scores_LA_eval.txt
+      la_result: experiments/paper_final/wav2vec2_frozen_multiseed/seed_1234/eval/results_LA_eval.txt
+      config: missing
+      checkpoint: experiments/paper_final/wav2vec2_frozen_multiseed/seed_1234/best_model.pt
+      df_score: experiments/paper_final/wav2vec2_frozen_multiseed/seed_1234/eval/scores_DF_eval.txt
+      df_result: experiments/paper_final/wav2vec2_frozen_multiseed/seed_1234/eval/results_DF_eval.txt
+- id: wav2vec2_adapter
+  model: wav2vec2
+  strategy: Adapter
+  n_source: 5 = 4 local + seed1234 external run
+  status: partial
+  notes: EER matches paper; tDCF should be 0.255 if seed1234 is included. Checkpoint gaps for seeds 42/789.
+  seeds:
+  - id: 42
+    source: local
+    status: partial
+    metrics:
+      la_eer: 3.3217
+      la_tdcf: 0.2707
+      df_eer: 3.9819
+    artifacts:
+      la_score: experiments/paper_final/wav2vec2_adapter_multiseed/seed_42/eval/scores_LA_eval.txt
+      la_result: experiments/paper_final/wav2vec2_adapter_multiseed/seed_42/eval/results_LA_eval.txt
+      config: experiments/paper_final/wav2vec2_adapter_multiseed/seed_42/models/w2v2_adapter_s42_seed42/config.yaml
+      checkpoint: experiments/paper_final/wav2vec2_adapter_multiseed/seed_42/models/w2v2_adapter_s42_seed42/epoch_5_eer_5.85.pth
+      df_score: experiments/paper_final/wav2vec2_adapter_multiseed/seed_42/eval/scores_DF_eval.txt
+      df_result: experiments/paper_final/wav2vec2_adapter_multiseed/seed_42/eval/results_DF_eval.txt
+  - id: 123
+    source: local
+    status: partial
+    metrics:
+      la_eer: 2.3284
+      la_tdcf: 0.2458
+      df_eer: 5.8586
+    artifacts:
+      la_score: experiments/paper_final/wav2vec2_adapter_multiseed/seed_123/eval/scores_LA_eval.txt
+      la_result: experiments/paper_final/wav2vec2_adapter_multiseed/seed_123/eval/results_LA_eval.txt
+      config: experiments/paper_final/wav2vec2_adapter_multiseed/seed_123/models/w2v2_adapter_s123_seed123/config.yaml
+      checkpoint: experiments/paper_final/wav2vec2_adapter_multiseed/seed_123/models/w2v2_adapter_s123_seed123/epoch_12_eer_5.42.pth
+      df_score: experiments/paper_final/wav2vec2_adapter_multiseed/seed_123/eval/scores_DF_eval.txt
+      df_result: experiments/paper_final/wav2vec2_adapter_multiseed/seed_123/eval/results_DF_eval.txt
+  - id: 456
+    source: local
+    status: partial
+    metrics:
+      la_eer: 2.8833
+      la_tdcf: 0.2582
+      df_eer: 5.5107
+    artifacts:
+      la_score: experiments/paper_final/wav2vec2_adapter_multiseed/seed_456/eval/scores_LA_eval.txt
+      la_result: experiments/paper_final/wav2vec2_adapter_multiseed/seed_456/eval/results_LA_eval.txt
+      config: experiments/paper_final/wav2vec2_adapter_multiseed/seed_456/models/w2v2_adapter_s456_seed456/config.yaml
+      checkpoint: experiments/paper_final/wav2vec2_adapter_multiseed/seed_456/models/w2v2_adapter_s456_seed456/epoch_12_eer_5.42.pth
+      df_score: experiments/paper_final/wav2vec2_adapter_multiseed/seed_456/eval/scores_DF_eval.txt
+      df_result: experiments/paper_final/wav2vec2_adapter_multiseed/seed_456/eval/results_DF_eval.txt
+  - id: 789
+    source: local
+    status: partial
+    metrics:
+      la_eer: 1.6333
+      la_tdcf: 0.2284
+      df_eer: 4.8891
+    artifacts:
+      la_score: experiments/paper_final/wav2vec2_adapter_multiseed/seed_789/eval/scores_LA_eval.txt
+      la_result: experiments/paper_final/wav2vec2_adapter_multiseed/seed_789/eval/results_LA_eval.txt
+      config: experiments/paper_final/wav2vec2_adapter_multiseed/seed_789/models/w2v2_adapter_s789_seed789/config.yaml
+      checkpoint: experiments/paper_final/wav2vec2_adapter_multiseed/seed_789/models/w2v2_adapter_s789_seed789/epoch_17_eer_6.51.pth
+      df_score: experiments/paper_final/wav2vec2_adapter_multiseed/seed_789/eval/scores_DF_eval.txt
+      df_result: experiments/paper_final/wav2vec2_adapter_multiseed/seed_789/eval/results_DF_eval.txt
+  - id: 1234
+    source: external_run
+    status: partial
+    metrics:
+      la_eer: 3.6857
+      la_tdcf: 0.2733
+      df_eer: 5.2858
+    artifacts:
+      la_score: experiments/eval_wav2vec2_adapter/scores_LA_eval.txt
+      la_result: experiments/eval_wav2vec2_adapter/results_LA_eval.txt
+      config: outputs/2026-02-07/13-13-09/experiments/models/wav2vec2_adapter_fair_seed1234/config.yaml
+      checkpoint: outputs/2026-02-07/13-13-09/experiments/models/wav2vec2_adapter_fair_seed1234/epoch_14_eer_5.51.pth
+      df_score: experiments/eval_wav2vec2_adapter/scores_DF_eval.txt
+      df_result: experiments/eval_wav2vec2_adapter/results_DF_eval.txt
+- id: wav2vec2_full_local
+  model: wav2vec2
+  strategy: Full FT
+  n_source: 3 local reproduced
+  status: partial
+  notes: Do not describe as 4 local seeds. Paper value requires adding Tak et al. external point.
+  seeds:
+  - id: 42
+    source: local
+    status: partial
+    metrics:
+      la_eer: 1.1
+      la_tdcf: 0.2157
+      df_eer: 4.17
+    artifacts:
+      la_score: experiments/paper_final/wav2vec2_fullft_multiseed/seed_42/eval/scores_LA_eval.txt
+      la_result: experiments/paper_final/wav2vec2_fullft_multiseed/seed_42/eval/results_LA_eval.txt
+      config: local_private/.../run_w2v_fullft.sh
+      checkpoint: experiments/paper_final/wav2vec2_fullft_multiseed/seed_42/models/epoch_32.pth
+      df_score: experiments/paper_final/wav2vec2_fullft_multiseed/seed_42/eval/scores_DF_eval.txt
+      df_result: experiments/paper_final/wav2vec2_fullft_multiseed/seed_42/eval/results_DF_eval.txt
+  - id: 123
+    source: local
+    status: partial
+    metrics:
+      la_eer: 1.03
+      la_tdcf: 0.2127
+      df_eer: 5.78
+    artifacts:
+      la_score: experiments/paper_final/wav2vec2_fullft_multiseed/seed_123/eval/scores_LA_eval.txt
+      la_result: experiments/paper_final/wav2vec2_fullft_multiseed/seed_123/eval/results_LA_eval.txt
+      config: local_private/.../run_w2v_fullft.sh
+      checkpoint: experiments/paper_final/wav2vec2_fullft_multiseed/seed_123/models/epoch_38.pth
+      df_score: experiments/paper_final/wav2vec2_fullft_multiseed/seed_123/eval/scores_DF_eval.txt
+      df_result: experiments/paper_final/wav2vec2_fullft_multiseed/seed_123/eval/results_DF_eval.txt
+  - id: 1234
+    source: local
+    status: partial
+    metrics:
+      la_eer: 1.15
+      la_tdcf: 0.2164
+      df_eer: 3.29
+    artifacts:
+      la_score: experiments/paper_final/wav2vec2_fullft_multiseed/seed_1234/eval/scores_LA_eval.txt
+      la_result: experiments/paper_final/wav2vec2_fullft_multiseed/seed_1234/eval/results_LA_eval.txt
+      config: experiments/paper_final/wav2vec2_fullft_multiseed/seed_1234/README.md
+      checkpoint: experiments/paper_final/wav2vec2_fullft_multiseed/seed_1234/models/epoch_22.pth
+      df_score: experiments/paper_final/wav2vec2_fullft_multiseed/seed_1234/eval/scores_DF_eval.txt
+      df_result: experiments/paper_final/wav2vec2_fullft_multiseed/seed_1234/eval/results_DF_eval.txt
+- id: mimo_frozen
+  model: MiMo
+  strategy: Frozen
+  n_source: 5 found evals
+  status: invalid as paper row
+  notes: Includes seed 456 by default. `*` tDCF is n=4 because seed1234 score file is missing.
+  tdcf_note: n=4 because seed1234 score file is missing
+  tdcf_marker: '*'
+  seeds:
+  - id: 42
+    source: local
+    status: partial
+    metrics:
+      la_eer: 6.9238
+      la_tdcf: 0.355
+      df_eer: 13.3443
+    artifacts:
+      la_score: experiments/paper_final/mimo_frozen_multiseed/seed_42/eval/scores_LA_eval.txt
+      la_result: experiments/paper_final/mimo_frozen_multiseed/seed_42/eval/results_LA_eval.txt
+      config: experiments/paper_final/mimo_frozen_multiseed/seed_42/models/mimo_frozen_s42_seed42/config.yaml
+      checkpoint: experiments/paper_final/mimo_frozen_multiseed/seed_42/models/mimo_frozen_s42_seed42/epoch_1_eer_11.17.pth
+      df_score: experiments/paper_final/mimo_frozen_multiseed/seed_42/eval/scores_DF_eval.txt
+      df_result: experiments/paper_final/mimo_frozen_multiseed/seed_42/eval/results_DF_eval.txt
+  - id: 123
+    source: local
+    status: partial
+    metrics:
+      la_eer: 5.7993
+      la_tdcf: 0.3282
+      df_eer: 12.3552
+    artifacts:
+      la_score: experiments/paper_final/mimo_frozen_multiseed/seed_123/eval/scores_LA_eval.txt
+      la_result: experiments/paper_final/mimo_frozen_multiseed/seed_123/eval/results_LA_eval.txt
+      config: experiments/paper_final/mimo_frozen_multiseed/seed_123/models/mimo_frozen_s123_seed123/config.yaml
+      checkpoint: experiments/paper_final/mimo_frozen_multiseed/seed_123/models/mimo_frozen_s123_seed123/epoch_6_eer_10.85.pth
+      df_score: experiments/paper_final/mimo_frozen_multiseed/seed_123/eval/scores_DF_eval.txt
+      df_result: experiments/paper_final/mimo_frozen_multiseed/seed_123/eval/results_DF_eval.txt
+  - id: 456
+    source: local
+    status: partial
+    metrics:
+      la_eer: 11.2158
+      la_tdcf: 0.4294
+      df_eer: 14.6808
+    artifacts:
+      la_score: experiments/paper_final/mimo_frozen_multiseed/seed_456/eval/scores_LA_eval.txt
+      la_result: experiments/paper_final/mimo_frozen_multiseed/seed_456/eval/results_LA_eval.txt
+      config: experiments/paper_final/mimo_frozen_multiseed/seed_456/models/mimo_frozen_s456_seed456/config.yaml
+      checkpoint: experiments/paper_final/mimo_frozen_multiseed/seed_456/models/mimo_frozen_s456_seed456/epoch_0_eer_13.67.pth
+      df_score: experiments/paper_final/mimo_frozen_multiseed/seed_456/eval/scores_DF_eval.txt
+      df_result: experiments/paper_final/mimo_frozen_multiseed/seed_456/eval/results_DF_eval.txt
+  - id: 789
+    source: local
+    status: partial
+    metrics:
+      la_eer: 6.04
+      la_tdcf: 0.3296
+      df_eer: 12.2597
+    artifacts:
+      la_score: experiments/paper_final/mimo_frozen_multiseed/seed_789/eval/scores_LA_eval.txt
+      la_result: experiments/paper_final/mimo_frozen_multiseed/seed_789/eval/results_LA_eval.txt
+      config: experiments/paper_final/mimo_frozen_multiseed/seed_789/models/mimo_frozen_s789_seed789/config.yaml
+      checkpoint: experiments/paper_final/mimo_frozen_multiseed/seed_789/models/mimo_frozen_s789_seed789/epoch_5_eer_10.63.pth
+      df_score: experiments/paper_final/mimo_frozen_multiseed/seed_789/eval/scores_DF_eval.txt
+      df_result: experiments/paper_final/mimo_frozen_multiseed/seed_789/eval/results_DF_eval.txt
+  - id: 1234
+    source: local
+    status: partial
+    metrics:
+      la_eer: 5.5946
+      df_eer: 11.6748
+    artifacts:
+      la_score: missing
+      la_result: experiments/paper_final/mimo_frozen_multiseed/seed_1234/eval/results_LA_eval.txt
+      config: missing
+      checkpoint: outputs/2026-02-08/02-05-01/.../epoch_1_eer_9.78.pth
+      df_score: missing
+      df_result: experiments/paper_final/mimo_frozen_multiseed/seed_1234/eval/results_DF_eval.txt
+- id: mimo_adapter
+  model: MiMo
+  strategy: Adapter
+  n_source: 2 found evals
+  status: exploratory
+  notes: Missing n=5 artifacts assumed unavailable. Paper n=5 mean/std unsupported; no significance claims.
+  exploratory: true
+  seeds:
+  - id: trial39_42ish
+    source: local_optuna_trial
+    status: partial
+    metrics:
+      la_eer: 4.4053
+      la_tdcf: 0.2979
+      df_eer: 11.7145
+    artifacts:
+      la_score: experiments/eval_2021_v2/scores_LA_eval.txt
+      la_result: experiments/eval_2021_v2/results_LA_eval.txt
+      config: experiments/optuna/mimo_hpo_v2/trial_0039/config.yaml
+      checkpoint: experiments/optuna/mimo_hpo_v2/trial_0039/best_model.pt
+      df_score: experiments/eval_2021_v2/scores_DF_eval.txt
+      df_result: experiments/eval_2021_v2/results_DF_eval.txt
+  - id: 2024
+    source: local_eval
+    status: partial
+    metrics:
+      la_eer: 4.37
+      la_tdcf: 0.2966
+      df_eer: 7.7014
+    artifacts:
+      la_score: experiments/eval_seed2024/scores_LA_eval.txt
+      la_result: experiments/eval_seed2024/results_LA_eval.txt
+      config: configs/train_seed2024.yaml
+      checkpoint: outputs/2026-01-27/18-01-37/.../epoch_4_eer_9.87.pth
+      df_score: experiments/eval_seed2024/scores_DF_eval.txt
+      df_result: experiments/eval_seed2024/results_DF_eval.txt
+- id: mimo_full
+  model: MiMo
+  strategy: Full FT
+  n_source: 5 = 4 local + seed1234 external run
+  status: partial
+  notes: EER matches paper only with seed1234; tDCF should be 0.350 if seed1234 is included. Seed/checkpoint caveats remain.
+  seeds:
+  - id: 42
+    source: local
+    status: partial
+    metrics:
+      la_eer: 4.2797
+      la_tdcf: 0.2823
+      df_eer: 14.042
+    artifacts:
+      la_score: experiments/paper_final/mimo_full_multiseed/seed_42/eval/scores_LA_eval.txt
+      la_result: experiments/paper_final/mimo_full_multiseed/seed_42/eval/results_LA_eval.txt
+      config: experiments/paper_final/mimo_full_multiseed/seed_42/models/mimo_full_s42_seed42/config.yaml
+      checkpoint: experiments/paper_final/mimo_full_multiseed/seed_42/models/mimo_full_s42_seed42/epoch_12_eer_9.87.pth
+      df_score: experiments/paper_final/mimo_full_multiseed/seed_42/eval/scores_DF_eval.txt
+      df_result: experiments/paper_final/mimo_full_multiseed/seed_42/eval/results_DF_eval.txt
+  - id: 123
+    source: local
+    status: partial
+    metrics:
+      la_eer: 5.2646
+      la_tdcf: 0.3094
+      df_eer: 12.4277
+    artifacts:
+      la_score: experiments/paper_final/mimo_full_multiseed/seed_123/eval/scores_LA_eval.txt
+      la_result: experiments/paper_final/mimo_full_multiseed/seed_123/eval/results_LA_eval.txt
+      config: experiments/paper_final/mimo_full_multiseed/seed_123/models/mimo_full_s123_seed123/config.yaml
+      checkpoint: experiments/paper_final/mimo_full_multiseed/seed_123/models/mimo_full_s123_seed123/epoch_1_eer_9.98.pth
+      df_score: experiments/paper_final/mimo_full_multiseed/seed_123/eval/scores_DF_eval.txt
+      df_result: experiments/paper_final/mimo_full_multiseed/seed_123/eval/results_DF_eval.txt
+  - id: 456
+    source: local
+    status: partial
+    metrics:
+      la_eer: 8.5484
+      la_tdcf: 0.3886
+      df_eer: 13.4204
+    artifacts:
+      la_score: experiments/paper_final/mimo_full_multiseed/seed_456/eval/scores_LA_eval.txt
+      la_result: experiments/paper_final/mimo_full_multiseed/seed_456/eval/results_LA_eval.txt
+      config: experiments/paper_final/mimo_full_multiseed/seed_456/models/mimo_full_s456_seed456/config.yaml
+      checkpoint: experiments/paper_final/mimo_full_multiseed/seed_456/models/mimo_full_s456_seed456/epoch_0_eer_12.02.pth
+      df_score: experiments/paper_final/mimo_full_multiseed/seed_456/eval/scores_DF_eval.txt
+      df_result: experiments/paper_final/mimo_full_multiseed/seed_456/eval/results_DF_eval.txt
+  - id: 789
+    source: local
+    status: partial
+    metrics:
+      la_eer: 7.9519
+      la_tdcf: 0.3718
+      df_eer: 12.8647
+    artifacts:
+      la_score: experiments/paper_final/mimo_full_multiseed/seed_789/eval/scores_LA_eval.txt
+      la_result: experiments/paper_final/mimo_full_multiseed/seed_789/eval/results_LA_eval.txt
+      config: experiments/paper_final/mimo_full_multiseed/seed_789/models/mimo_full_s789_seed789/config.yaml
+      checkpoint: experiments/paper_final/mimo_full_multiseed/seed_789/models/mimo_full_s789_seed789/epoch_1_eer_11.84.pth
+      df_score: experiments/paper_final/mimo_full_multiseed/seed_789/eval/scores_DF_eval.txt
+      df_result: experiments/paper_final/mimo_full_multiseed/seed_789/eval/results_DF_eval.txt
+  - id: 1234
+    source: external_run
+    status: partial
+    metrics:
+      la_eer: 8.6448
+      la_tdcf: 0.3957
+      df_eer: 10.9228
+    artifacts:
+      la_score: experiments/eval_mimo_full/scores_LA_eval.txt
+      la_result: experiments/eval_mimo_full/results_LA_eval.txt
+      config: missing
+      checkpoint: outputs/2026-02-08/05-20-18/.../epoch_1_eer_13.34.pth
+      df_score: experiments/eval_mimo_full/scores_DF_eval.txt
+      df_result: experiments/eval_mimo_full/results_DF_eval.txt

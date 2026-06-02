@@ -1,0 +1,305 @@
+schema_version: mimodf-heavy-artifact-cleanup/v1
+created: '2026-05-31T06:50:11.314683-03:00'
+started: '2026-05-31T06:49:12.481073-03:00'
+git_revision: 3b8b3ad4d1b4fc10f6ad3b2a359ceaaafdfc2c65
+actions:
+- kind: archive_move
+  source: <repo>/experiments/paper_final/wav2vec2_fullft_matched_weights
+  destination: <artifact-archive>/mimo-deepfake-detection/2026-05-31/experiments/paper_final/wav2vec2_fullft_matched_weights
+  size_bytes_before: 102123967471
+  files: 92
+  manifest:
+  - relative_path: seed_123/eval/results_DF_eval.txt
+    size_bytes: 11
+    sha256: c4a29d91f575da6f887b24d567b3515819abd7020ffecfe569306b37fd6d83cd
+  - relative_path: seed_123/eval/results_LA_eval.txt
+    size_bytes: 27
+    sha256: 1e385a512223a51f789cb5931a4b5982ef3a7e225495524b119bd72762da8a24
+  - relative_path: seed_123/eval/scores_DF_eval.txt
+    size_bytes: 19578140
+    sha256: 0ac3e6770dff6cb915b6b79b14c0b785abc3027f0ec8719e198f41561fffc709
+  - relative_path: seed_123/eval/scores_LA_eval.txt
+    size_bytes: 5804405
+    sha256: 40a27015cf19e8b0d39a97d35f402f7025135f49d483fa45d05ff018c2973299
+  - relative_path: seed_123/models/epoch_0.pth
+    size_bytes: 1271618683
+    sha256: 31608eb749502d87ff1cc2dbc454438f33ea61b7f395ddc20f08ea81f4f3710b
+  - relative_path: seed_123/models/epoch_1.pth
+    size_bytes: 1271618683
+    sha256: 686b1ae40f212f56d46e6480367cfd3a518fc4639442138cc533e34033d64a22
+  - relative_path: seed_123/models/epoch_10.pth
+    size_bytes: 1271619939
+    sha256: ffb15d9da7d53a3eb70e54b0b6c5b2a7494434bb27fcff7ac2f2563462795eed
+  - relative_path: seed_123/models/epoch_11.pth
+    size_bytes: 1271619939
+    sha256: 6efdba3947779fb9955e10e49bb61c814a198dbe482be98994fffc4fe1950fee
+  - relative_path: seed_123/models/epoch_12.pth
+    size_bytes: 1271619939
+    sha256: a413b599915154e53461bfe1f95c663f8d603b7b69283ee020c333d48e0be33c
+  - relative_path: seed_123/models/epoch_13.pth
+    size_bytes: 1271619939
+    sha256: 43632414ce17f2409a4769b5ad300712f81336e3e50bb49e2d27455f98681242
+  - relative_path: seed_123/models/epoch_14.pth
+    size_bytes: 1271619939
+    sha256: fb2ea2b3767e00ef0aa6e6eae8cebc23e31e0dff33861134d76569a36c742064
+  - relative_path: seed_123/models/epoch_15.pth
+    size_bytes: 1271619939
+    sha256: b40d2f316e018cbf1e5283b60584766c583cf1da781e47bf864e3051ac0f3993
+  - relative_path: seed_123/models/epoch_16.pth
+    size_bytes: 1271619939
+    sha256: 8579b86ce4a2a4b3e1483e3de536f9a508f44e924fd2d2a48c7a2c94a61d0b2b
+  - relative_path: seed_123/models/epoch_17.pth
+    size_bytes: 1271619939
+    sha256: fb58f947da9aca8183ff6a533843013932fb96465cc8d950e5086ef7a23a7080
+  - relative_path: seed_123/models/epoch_18.pth
+    size_bytes: 1271619939
+    sha256: 379e3b3be331bda2496bc39c6c62831c21c40e923f2984dc42aee1e5e1feedf5
+  - relative_path: seed_123/models/epoch_19.pth
+    size_bytes: 1271619939
+    sha256: 9c174be431f4fe76698c8fd7aa04244d3682985c72d91a05904f96f8125436ce
+  - relative_path: seed_123/models/epoch_2.pth
+    size_bytes: 1271618683
+    sha256: d2ec715f3e97377838a67e1763096ff2fd6fd67dc924f0becdfd481938ee9a9c
+  - relative_path: seed_123/models/epoch_20.pth
+    size_bytes: 1271619939
+    sha256: 6a19c482a5cee726a4ab10817e7dd0fb215f7893332b8ceba53f1b98d181a46b
+  - relative_path: seed_123/models/epoch_21.pth
+    size_bytes: 1271619939
+    sha256: 5b5b3aaf3975675d1e68a8d1b199f073945a808cd74869b47812df27e0d7a5f3
+  - relative_path: seed_123/models/epoch_22.pth
+    size_bytes: 1271619939
+    sha256: 3ff00f1f9a7bc253560a3aa656211baf919db411650be0e8cb1a2624f320905b
+  - relative_path: seed_123/models/epoch_23.pth
+    size_bytes: 1271619939
+    sha256: b71eb7228e8c855ad05526fe2d09e92c312f7de084c5b8820b7136443ef4a4be
+  - relative_path: seed_123/models/epoch_24.pth
+    size_bytes: 1271619939
+    sha256: 5e9d07690f84b172810539258a03f3773b08da320c5f0865365d0b6d5e1282b0
+  - relative_path: seed_123/models/epoch_25.pth
+    size_bytes: 1271619939
+    sha256: 3f872be6cd6da0c4c12b908f2fc8ddad368552bb522b50ae71b56592fec839cc
+  - relative_path: seed_123/models/epoch_26.pth
+    size_bytes: 1271619939
+    sha256: bc7db4a7aa042dc59e29d63d7679ca31637283527bd4c63eab5eb4e5b75b0577
+  - relative_path: seed_123/models/epoch_27.pth
+    size_bytes: 1271619939
+    sha256: 915ca33dffee4dd7d639b231ae7300afc2945b87b4c17927ae76b4cd52a0d67a
+  - relative_path: seed_123/models/epoch_28.pth
+    size_bytes: 1271619939
+    sha256: a1decbc6375c5d337638430cdfd642037fa3dadd2475eeac6558249ab931edc6
+  - relative_path: seed_123/models/epoch_29.pth
+    size_bytes: 1271619939
+    sha256: 6aea6f1c730f2dc410de3b244d628f081341b2cae6c8da83839cbd641383821a
+  - relative_path: seed_123/models/epoch_3.pth
+    size_bytes: 1271618683
+    sha256: 624cf9da75dce9392fab1d3ec74f36ac3b15175c16b040010ba12a97a3b4b424
+  - relative_path: seed_123/models/epoch_30.pth
+    size_bytes: 1271619939
+    sha256: 717af08a83724140c3b25f9068635f2c001bdbc93abea453e9aaee221f3c75cf
+  - relative_path: seed_123/models/epoch_31.pth
+    size_bytes: 1271619939
+    sha256: 7cbcc966b12747d507174fabd23954ba20d9718cdd0f3a711dfa297127bf7324
+  - relative_path: seed_123/models/epoch_32.pth
+    size_bytes: 1271619939
+    sha256: 6750a82ebd5e0b26a5d90de333de07e36a7bc16d6f74952d47cea2078f82c82d
+  - relative_path: seed_123/models/epoch_33.pth
+    size_bytes: 1271619939
+    sha256: a0ca51e97c001a6365bae5c6237785eeb7c55ba98bde060ad11a90f314b7e0f0
+  - relative_path: seed_123/models/epoch_34.pth
+    size_bytes: 1271619939
+    sha256: 6c50b644d9f22ace9b507bcdfd90a6821edc37e2135a3de78762ade841cf92d4
+  - relative_path: seed_123/models/epoch_35.pth
+    size_bytes: 1271619939
+    sha256: 9be916da0980e4b30a4089e268d710c36fc5ab87e120dcf2df548503027b090f
+  - relative_path: seed_123/models/epoch_36.pth
+    size_bytes: 1271619939
+    sha256: 6045b47e167cfaaf7975565d9e1df46c74d8a80b34efb503fadaeb3d122e3fd7
+  - relative_path: seed_123/models/epoch_37.pth
+    size_bytes: 1271619939
+    sha256: 44db46005e1a06ce6dc18c256446f14e5d4de16230dc6e540608bd05c00e48dd
+  - relative_path: seed_123/models/epoch_38.pth
+    size_bytes: 1271619939
+    sha256: b289950f0ca71eccccc7b358be021b0350350f3e9748f969cfef8883b99c35ba
+  - relative_path: seed_123/models/epoch_39.pth
+    size_bytes: 1271619939
+    sha256: 100443f19828e18bf3e361d80d105d71d1e2c0b4f670bc8b1df3c739b4714813
+  - relative_path: seed_123/models/epoch_4.pth
+    size_bytes: 1271618683
+    sha256: ab5aff943aa27bc6323340aa6345753d20498e0705201a18f02baeb8abb187cf
+  - relative_path: seed_123/models/epoch_5.pth
+    size_bytes: 1271618683
+    sha256: d2d800feafde8f33e7cd8f4733ec3afce8233b47d5a4036e900eed8b116d3040
+  - relative_path: seed_123/models/epoch_6.pth
+    size_bytes: 1271618683
+    sha256: 1c02b2f2f5cd71672cbe03854f8966dd2ab9904e7e88bc7a0fb4a3329157b4b6
+  - relative_path: seed_123/models/epoch_7.pth
+    size_bytes: 1271618683
+    sha256: 5fbacb2f3a114593526c3c4b3d1bcac7d8defaf790b1959466cab2d176e6f9aa
+  - relative_path: seed_123/models/epoch_8.pth
+    size_bytes: 1271618683
+    sha256: 9c6882c9ceaa50efc92946d5530751a6317a7737440c8ab888ebf1fe5a2a4106
+  - relative_path: seed_123/models/epoch_9.pth
+    size_bytes: 1271618683
+    sha256: dc81271c8424143fed5f698a43f719674e2e9e209cf977f3deca3346bb5a3ff7
+  - relative_path: seed_123/train.log
+    size_bytes: 171817402
+    sha256: 66084447e625f1d648d5cf121cdef71b7a2d5806426d84b32d7a061550745cfa
+  - relative_path: seed_123/training_done
+    size_bytes: 0
+    sha256: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+  - relative_path: seed_42/eval/results_DF_eval.txt
+    size_bytes: 11
+    sha256: a85130484b656251a09da803ccf6bc4becad09540cb788e3c7b0ba157544af37
+  - relative_path: seed_42/eval/results_LA_eval.txt
+    size_bytes: 27
+    sha256: 77f07fcd63bcc5c02f263a84f596e3cfd5a5f32bb549f55a54d52cd6d021fe6f
+  - relative_path: seed_42/eval/scores_DF_eval.txt
+    size_bytes: 19579066
+    sha256: d88ece3ed494087bda840a8067fd67ff1dacfc5d7a03de79283a5864ea00dede
+  - relative_path: seed_42/eval/scores_LA_eval.txt
+    size_bytes: 5800984
+    sha256: 02b836e0aadf8284ead0639874c762887665d25890aa714ac385894a12d5530d
+  - relative_path: seed_42/models/epoch_0.pth
+    size_bytes: 1271618683
+    sha256: 9c2c204b3d3631a8b96b0e611fc9bdebc2a257ea20fb5590b0d010b56e18af82
+  - relative_path: seed_42/models/epoch_1.pth
+    size_bytes: 1271618683
+    sha256: 6dbe0dd833cba8617cef15d5237a23d92050a65e05cd9bbc6d0c6e53441b39db
+  - relative_path: seed_42/models/epoch_10.pth
+    size_bytes: 1271619939
+    sha256: 617185649c9e1a4cf1445e30fb61a4379b17de4188ef762ab3c8fd7afa2321e3
+  - relative_path: seed_42/models/epoch_11.pth
+    size_bytes: 1271619939
+    sha256: d3bd04be084d4222b873c697be8ef9da90cad738b896d4e50d3a3b82ca362c8f
+  - relative_path: seed_42/models/epoch_12.pth
+    size_bytes: 1271619939
+    sha256: 43212325bbfd98eba6c543e6d6378da895aaf6eb037373051de89b0a365859b8
+  - relative_path: seed_42/models/epoch_13.pth
+    size_bytes: 1271619939
+    sha256: 0e5ca299fbe4d01c1f7cac1dc469fbb154704f61f95e0a3427cc84656ca8000e
+  - relative_path: seed_42/models/epoch_14.pth
+    size_bytes: 1271619939
+    sha256: 08f3ded283fb1a569c9eba7c918cee4d369e08374d6a6920a85246c5917e943c
+  - relative_path: seed_42/models/epoch_15.pth
+    size_bytes: 1271619939
+    sha256: a39900732445180336824dcf46c7ad4f008320604749e5b21a1177c016ac36ae
+  - relative_path: seed_42/models/epoch_16.pth
+    size_bytes: 1271619939
+    sha256: 9d16de48c494739d4cd3ca35f211c4c29b2e24f1810214d4a9f4f55f21c8acaf
+  - relative_path: seed_42/models/epoch_17.pth
+    size_bytes: 1271619939
+    sha256: 0d3b12b3978e1707335e14200804b69620f0d40874edcfdc05acdaac23eef088
+  - relative_path: seed_42/models/epoch_18.pth
+    size_bytes: 1271619939
+    sha256: a3acc556821f146526302746319677c365b3aa093438ff885ba8373bebbf6523
+  - relative_path: seed_42/models/epoch_19.pth
+    size_bytes: 1271619939
+    sha256: 2e9661b2dd97a62320d49a8e02b3f933fd2c532e0e7619dd9bdadc33d0bdefdc
+  - relative_path: seed_42/models/epoch_2.pth
+    size_bytes: 1271618683
+    sha256: 4fdeb1352d2d68fc6c8f6e6cde375f717b5139d4e24779f368921a0b4e250948
+  - relative_path: seed_42/models/epoch_20.pth
+    size_bytes: 1271619939
+    sha256: 5183ef17c73ab4b0a863ae9a678196a09c2151145f6216cdb31b9867ff26e86b
+  - relative_path: seed_42/models/epoch_21.pth
+    size_bytes: 1271619939
+    sha256: 5e7e2f9fa1e5a2fa068a5ce336a447b78ed66e1b31193a32a2ea567a5a40a04f
+  - relative_path: seed_42/models/epoch_22.pth
+    size_bytes: 1271619939
+    sha256: bc213c13c3437faab13da44384d24fc9d5ec9304f506adf5dec270bd763b1c3b
+  - relative_path: seed_42/models/epoch_23.pth
+    size_bytes: 1271619939
+    sha256: 3fcaf47070ad7c9f19eba6268d08f7366ac6fe8481cd7f14b6742f89db45e9d6
+  - relative_path: seed_42/models/epoch_24.pth
+    size_bytes: 1271619939
+    sha256: 95c3ed2d211b1f2493548893764f7c983313e1ee9acdbb7cfad780f42590b34e
+  - relative_path: seed_42/models/epoch_25.pth
+    size_bytes: 1271619939
+    sha256: 3b21cd880189789706368d36f4de9d81a1e56156855412a28a0c49fbc26e3d9b
+  - relative_path: seed_42/models/epoch_26.pth
+    size_bytes: 1271619939
+    sha256: a4e81f7bb5bffd6d734432b92fb56743ab9457405c052975dab4e3bdb29fd8c6
+  - relative_path: seed_42/models/epoch_27.pth
+    size_bytes: 1271619939
+    sha256: 201f158e3d070195883826728059befcb6fd03579ac139becf3a7f2b8cbf32af
+  - relative_path: seed_42/models/epoch_28.pth
+    size_bytes: 1271619939
+    sha256: 5bc32655692174fd22b46f03e6e450d95e6a10500b1948bcf5a79279d6eda95e
+  - relative_path: seed_42/models/epoch_29.pth
+    size_bytes: 1271619939
+    sha256: fdf1d058c126da552b3d1bd76530f2885225a2c28cc3c1b6c37d954195288783
+  - relative_path: seed_42/models/epoch_3.pth
+    size_bytes: 1271618683
+    sha256: 2adf7d9912fc12e505db777b1a762b5d8744af38f9d5dca58fb1e9bf55cc8e7c
+  - relative_path: seed_42/models/epoch_30.pth
+    size_bytes: 1271619939
+    sha256: a054ab18f5ea13ccd50d544c00e66d86ece82ad86fc8702054a0318b9382d9ee
+  - relative_path: seed_42/models/epoch_31.pth
+    size_bytes: 1271619939
+    sha256: 568baaf05828994e4a073f7a9edb65ae6456753d07d8bd526ef2b556dff47263
+  - relative_path: seed_42/models/epoch_32.pth
+    size_bytes: 1271619939
+    sha256: aec378f5923b5bb6e13f65d53a51efa2f16018e2eeabbfd0a1ec0588d8fa2cc2
+  - relative_path: seed_42/models/epoch_33.pth
+    size_bytes: 1271619939
+    sha256: d0d6edfc70ba453482039034bea2ca0991d502d244f87cdf206f4d3474ceefae
+  - relative_path: seed_42/models/epoch_34.pth
+    size_bytes: 1271619939
+    sha256: c4d79670e14f1768967053f3c1afb561ec9e395203c5dd90cb65c0a93394a633
+  - relative_path: seed_42/models/epoch_35.pth
+    size_bytes: 1271619939
+    sha256: c5b24d141078d9b8884fe8417cba4c4e283878327739aa79251fb90526fe99fd
+  - relative_path: seed_42/models/epoch_36.pth
+    size_bytes: 1271619939
+    sha256: df988190cb723272f3012447704baabc3a46567cc81b6d307a502b891299e8ec
+  - relative_path: seed_42/models/epoch_37.pth
+    size_bytes: 1271619939
+    sha256: 76c17d9fc672adcbe04bb748c979000701e40251bdb4e0cb0059d93c0deb9344
+  - relative_path: seed_42/models/epoch_38.pth
+    size_bytes: 1271619939
+    sha256: 21d4ac67e58b7af48d64df8f6afdae4bf1662b4fd0b7d2233ab5575b3804e81e
+  - relative_path: seed_42/models/epoch_39.pth
+    size_bytes: 1271619939
+    sha256: 094f55e836658f074cbcb71b8a76a31d63dcc0cebabfdfd630871db6ccfa6114
+  - relative_path: seed_42/models/epoch_4.pth
+    size_bytes: 1271618683
+    sha256: 5c3879f9dc926f6492bda6676e916e14982ea616ede778ff15ed0c6ac10476cb
+  - relative_path: seed_42/models/epoch_5.pth
+    size_bytes: 1271618683
+    sha256: 0f512ff6afffb57fc83ca9df7b350f1e998acc5935ddc71601db323e34c6e290
+  - relative_path: seed_42/models/epoch_6.pth
+    size_bytes: 1271618683
+    sha256: c19cf3fa31b6b82e38a0397d8ca16f488aad4ccc122cf5c83aad6a0ec161f6a8
+  - relative_path: seed_42/models/epoch_7.pth
+    size_bytes: 1271618683
+    sha256: df112e7e09e6eb1f381bbd3eec5f5b3fa3475c14c69ef1c278f9159f602dbc8b
+  - relative_path: seed_42/models/epoch_8.pth
+    size_bytes: 1271618683
+    sha256: f57c00a7fe1d9a82d9f4e0dcb0d2dd6aae296e948a4f85ccb67bdb925da0e5b5
+  - relative_path: seed_42/models/epoch_9.pth
+    size_bytes: 1271618683
+    sha256: 999f8c8e7b6bf67657220f0389b0ea2ee21b24bf206516818a19348731bb88dc
+  - relative_path: seed_42/train.log
+    size_bytes: 171817398
+    sha256: 1fde07686de1be4346c909a69b85ede0e995b79b6873da54e90119fbcc767767
+  - relative_path: seed_42/training_done
+    size_bytes: 0
+    sha256: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+  reason: large historical matched-weight full-finetune checkpoints; not current Wave
+    3 input
+  disk_note: moved within /home, so this shrinks repo size but does not materially
+    increase /home free space
+- kind: delete_reproducible_venv
+  source: <repo>/SSL_Anti-spoofing/.venv
+  size_bytes_before: 5173053073
+  reason: local virtual environment, reproducible and not provenance
+sizes:
+  repo_bytes_before: 237923681025
+  repo_bytes_after: 130626660481
+  repo_bytes_delta: 107297020544
+  home_free_bytes_before: 427241414656
+  home_free_bytes_after: 432486998016
+  home_free_bytes_delta: 5245583360
+restore_note: move <artifact-archive>/mimo-deepfake-detection/2026-05-31/experiments/paper_final/wav2vec2_fullft_matched_weights
+  back to <repo>/experiments/paper_final/wav2vec2_fullft_matched_weights
+  if this historical directory is needed

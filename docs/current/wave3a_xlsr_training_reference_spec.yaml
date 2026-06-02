@@ -1,0 +1,271 @@
+schema_version: mimodf-wave3a-xlsr-training-reference-spec/v1
+spec_id: wave3a_xlsr_training_reference_v1
+created: "2026-05-31"
+status: diagnostic_custom_split_planned_no_compute_authorized
+parent_plan: docs/current/wave3_training_validation_plan.yaml
+intent: >
+  Define the first concrete diagnostic Wave 3 trained-validation slice: XLS-R
+  trained-reference runs on custom CodecFake+ CoSG source shift. This spec is not
+  executable yet; it is the contract for building the CodecFake training/scoring
+  path and for approving the first GPU jobs. It is not the official CodecFake+
+  CoRS train/validation/eval protocol.
+
+research_question: >
+  Do XLS-R trained detectors preserve, erase, or amplify the source-failure map
+  observed in frozen feature probes on CodecFake+ CoSG?
+
+hypotheses:
+  h1_probe_to_training_persistence: >
+    Frozen XLS-R probe failures will predict some trained-detector weak sources,
+    but PEFT/full fine-tuning may move errors by learning source-specific cues.
+  h2_training_scope_tradeoff: >
+    Full fine-tuning may improve average clean CoSG performance while worsening
+    source-transfer stability relative to frozen-backend or PEFT training.
+  h3_reference_before_contrasts: >
+    MiMo/WavLM trained variants are not interpretable until XLS-R trained-reference
+    behavior is established.
+
+non_goals:
+  - no MiMo revival training
+  - no WavLM rescue training
+  - no Optuna or broad HPO
+  - no CoRS training in Wave 3A
+  - no ASVspoof LA/DF reruns
+  - no media-transform robustness claim in Wave 3A
+  - no paper claim from a single seed
+
+official_split_context:
+  summary: docs/current/CODECFAKE_OFFICIAL_SPLITS.md
+  cors_official_split: >
+    CoRS has official speaker splits: p226/p229 validation, p227/p228 Eval CoRS,
+    remaining speakers train. CoRS audio is downloaded as archive parts but not
+    extracted/indexed locally.
+  cosg_status: >
+    Local CoSG labels contain no train/validation split field and are best treated
+    as web-sourced evaluation data. The source-holdout plan below is a custom
+    diagnostic protocol.
+  maskgct_status: >
+    The CodecFake+ paper mentions additional MaskGCT-VCTK train/validation/evaluation
+    sets, but no local split/protocol files are staged/audited.
+
+track_label: custom_diagnostic_cosg_source_holdout
+
+dataset:
+  primary: codecfake_plus_cosg
+  protocol: features/mimodf/wave0/codecfake_plus_protocol.jsonl
+  audio_root: <datasets>/codecfake_plus/CoSG
+  records: 1797
+  role: custom diagnostic train/dev/test source-shift validation
+  caveats:
+    - Several sources have small bonafide/spoof support; report support tables.
+    - CoSG-only training is small-data diagnostic validation, not the official CodecFake+ training protocol.
+    - CoRS is downloaded but not extracted/indexed; excluded from Wave 3A.
+
+source_holdout_sources:
+  eligible_min_support_policy: at_least_10_bonafide_and_10_spoof
+  sources:
+    - MASKGCT
+    - CLAMTTS
+    - VALLE
+    - SIMPLESPEECH1
+    - NS3
+    - SIMPLESPEECH2
+    - NS2
+    - GPST
+    - UNIAUDIO
+  inherited_support_from_wave1:
+    MASKGCT: {bonafide: 576, spoof: 576}
+    CLAMTTS: {bonafide: 41, spoof: 78}
+    VALLE: {bonafide: 53, spoof: 57}
+    SIMPLESPEECH1: {bonafide: 34, spoof: 32}
+    NS3: {bonafide: 32, spoof: 32}
+    SIMPLESPEECH2: {bonafide: 31, spoof: 31}
+    NS2: {bonafide: 23, spoof: 23}
+    GPST: {bonafide: 10, spoof: 30}
+    UNIAUDIO: {bonafide: 11, spoof: 11}
+
+split_policy:
+  outer_evaluation: leave_one_source_out
+  train_pool_for_each_outer_fold: all_non_held_out_sources
+  validation_policy: >
+    Select checkpoints only from a deterministic stratified-row validation split carved
+    from the train pool. The held-out source must not influence checkpoint selection,
+    early stopping, thresholding, calibration, or hyperparameter choice.
+  validation_split_candidate: stratified_by_train_pool_source_and_label
+  validation_split_result: docs/current/wave3a_codecfake_cosg_source_holdout_plan_v3.json
+  validation_split_note: >
+    A source-level validation split was considered but is too unstable on CoSG: the
+    smallest eligible sources have only 22-40 rows, while MASKGCT has 1152 rows.
+    Wave 3A therefore uses source-holdout outer evaluation with train-pool
+    source/label-stratified validation for checkpoint selection.
+  threshold_policy: >
+    EER thresholds are computed on the held-out scores only for reporting EER, not
+    for model selection. Any deployable threshold or calibration is out of scope.
+
+model_conditions:
+  - id: xlsr_frozen_backend
+    component_frontend: frontend:wav2vec2-xlsr-300m/v1
+    adaptation: adaptation:frozen/v1
+    backend: backend:aasist/v1
+    purpose: baseline trained backend over frozen XLS-R representation
+    priority: first
+    expected_cost: moderate
+  - id: xlsr_peft_adapter
+    component_frontend: frontend:wav2vec2-xlsr-300m/v1
+    adaptation: adaptation:houlsby-adapter-last8/v1
+    backend: backend:aasist/v1
+    purpose: main trainable reference with bounded adaptation
+    priority: second
+    expected_cost: high
+  - id: xlsr_full_finetune
+    component_frontend: frontend:wav2vec2-xlsr-300m/v1
+    adaptation: adaptation:full-finetune/v1
+    backend: backend:aasist/v1
+    purpose: expensive upper/reference condition for training-scope tradeoff
+    priority: third_after_frozen_and_peft_health
+    expected_cost: very_high
+
+training_defaults_to_confirm:
+  sample_rate_hz: 16000
+  max_audio_seconds: open_issue_match_existing_xlsr_training_or_define_cut
+  batch_size: open_issue_gpu_memory_dependent
+  eval_batch_size: open_issue_gpu_memory_dependent
+  max_epochs: open_issue_predeclare_before_run
+  optimizer: open_issue_adam_or_adamw_param_groups
+  learning_rates:
+    frozen_backend: open_issue
+    peft_adapter: open_issue
+    full_finetune: open_issue
+  weight_decay: open_issue
+  rawboost: disabled_for_wave3a_initial_reference_unless_explicitly_added
+  early_stopping: open_issue_requires_validation_policy
+  checkpoint_selection_metric: validation_loss_or_validation_eer_open_issue
+  top_k_checkpoints: 1
+  deterministic_seed_controls: required
+
+seed_policy:
+  infrastructure_seed: 42
+  confirmatory_seeds: [42, 123, 2024]
+  rule: >
+    Seed 42 may validate the training path and produce directional evidence. Any
+    model comparison claim requires all confirmatory seeds or logged failed/interrupted
+    runs. No silent seed exclusions.
+
+outputs:
+  root: experiments/runs/wave3a_xlsr_training_reference_v1
+  per_run_required:
+    - resolved training spec
+    - run manifest with git revision, command, seed, fold, model condition, dataset paths
+    - best checkpoint with hash
+    - train/validation curves
+    - held-out source score file
+    - per-source metrics json
+    - prediction/case jsonl
+  summary_required:
+    - source_holdout_report.md
+    - source_holdout_metrics.json
+    - probe_vs_trained_failure_map.md
+    - seed_summary_when_confirmatory_runs_exist
+
+metrics:
+  primary:
+    - eer
+    - auroc
+    - balanced_accuracy
+    - false_positive_rate
+    - false_negative_rate
+  secondary:
+    - accuracy
+    - macro_f1
+    - score_distribution_by_label
+    - confusion_counts
+  comparison_to_wave1_probes:
+    - source_rank_correlation_by_eer
+    - per_source_delta_eer_vs_frozen_probe
+    - error_overlap_where_utterance_scores_are_comparable
+  uncertainty_required_for_claims:
+    - seed_mean_std
+    - support_table
+    - bootstrap_ci_if_implemented
+
+implementation_gaps:
+  - id: codecfake_raw_audio_training_loader
+    status: missing
+    need: Dataset/loader for CodecFake+ CoSG raw audio with explicit source-holdout folds.
+  - id: codecfake_training_cli_or_experiment_spec
+    status: missing
+    need: Launch path equivalent to legacy ASVspoof training but for CodecFake+.
+  - id: source_holdout_training_splitter
+    status: implemented_for_count_planning
+    artifact: docs/current/wave3a_codecfake_cosg_source_holdout_plan_v3.json
+    need: Extend from count planning to actual Dataset/DataLoader index splits.
+  - id: trained_score_writer
+    status: partial_or_missing
+    need: Stable score/prediction files for CodecFake records, not ASVspoof-only score format.
+  - id: trained_summary_report
+    status: missing
+    need: Per-source metrics and probe-vs-trained failure map report.
+  - id: component_registry_dataset_ids
+    status: missing
+    need: Add CodecFake dataset/scorer component IDs if using ExperimentSpec v1 machinery.
+
+approval_sequence:
+  - step: implement_or_select_training_path
+    compute: development_only
+    approval_required: false
+  - step: one_fold_one_model_dry_run_or_tiny_batch_smoke
+    compute: bounded_gpu_or_cpu_smoke
+    approval_required: true
+    claim_weight: infrastructure_only
+  - step: seed42_all_sources_frozen_backend
+    compute: gpu_training
+    approval_required: true
+    claim_weight: directional_only
+  - step: seed42_peft_and_full_reference
+    compute: gpu_training
+    approval_required: true
+    claim_weight: directional_only
+  - step: confirmatory_three_seed_matrix
+    compute: gpu_training_multi_run
+    approval_required: true
+    claim_weight: model_comparison_possible
+
+stop_rules:
+  - held_out_source_used_for_checkpoint_selection
+  - unlabeled_or_missing_audio_without_explicit exclusion report
+  - output path would overwrite an existing run without logged approval
+  - training run lacks planned execution-log row
+  - seed failure not recorded as failed/interrupted
+  - CUDA OOM repeated without reducing batch size under a new logged plan
+  - validation policy remains ambiguous at launch time
+
+split_plan_artifacts:
+  selected: docs/current/wave3a_codecfake_cosg_source_holdout_plan_v3.json
+  superseded:
+    - docs/current/wave3a_codecfake_cosg_source_holdout_plan.json
+    - docs/current/wave3a_codecfake_cosg_source_holdout_plan_v2.json
+  selected_policy: source_holdout_outer_eval_with_train_pool_source_label_stratified_validation
+  note: >
+    v1/v2 used source-level validation and were discarded for unstable validation support.
+    v3 keeps held-out sources clean while giving each fold a larger stratified validation set.
+
+first_next_actions:
+  - Extend deterministic source-holdout fold builder into actual row-index splits for DataLoaders.
+  - Implement CodecFake raw-audio Dataset/DataLoader seam.
+  - Implement score/prediction writer for CodecFake utterance IDs.
+  - Add a dry-run CLI that prints planned fold output paths without training.
+
+claim_policy:
+  allowed_now:
+    - Wave 3A has a concrete planned trained-reference spec.
+  allowed_after_tiny_smoke:
+    - CodecFake training path is runnable for bounded smoke only.
+  allowed_after_seed42_matrix:
+    - directional trained-reference evidence, no seed-general claim.
+  allowed_after_three_seed_matrix:
+    - predeclared trained XLS-R condition comparison with caveats and uncertainty.
+  never_allowed_from_wave3a:
+    - MiMo superiority
+    - media robustness claim
+    - CoRS transfer claim
+    - ASVspoof generalization claim

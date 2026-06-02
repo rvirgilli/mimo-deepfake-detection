@@ -1,0 +1,93 @@
+{
+  "claim_boundary": [
+    "custom CoSG source-holdout diagnostic only; not official CodecFake+ benchmark",
+    "frozen XLS-R backend has seeds 42/123/2024",
+    "PEFT XLS-R adapter has seed42 only",
+    "ASVspoof5 and CoRS official/proxy training are not yet staged/executed"
+  ],
+  "current_thesis": "Probe-guided trained validation shows that lightweight XLS-R adaptation improves average source-holdout transfer, but can induce a stable-looking source-specific failure mode that validation on other generators does not detect.",
+  "date": "2026-05-31",
+  "frozen_3seed": {
+    "mean_auroc": 0.7146404842645637,
+    "mean_balanced_accuracy": 0.6056753322019767,
+    "mean_eer": 0.340125865381668,
+    "std_auroc": 0.04480285017960583,
+    "std_balanced_accuracy": 0.06502278767212913,
+    "std_eer": 0.03309624568851923
+  },
+  "maskgct_failure": {
+    "peft_auroc": 0.4333104263117284,
+    "peft_best_validation_auroc": 0.8290598290598291,
+    "peft_eer": 0.5520833333333334,
+    "peft_predicted_spoof_rate_at_0p5": 0.9800347222222222,
+    "peft_selected_epoch": 6,
+    "test_records_maskgct": 1152,
+    "train_records_excluding_maskgct": 558,
+    "validation_records_excluding_maskgct": 87
+  },
+  "next_actions_ranked": [
+    {
+      "action": "Run targeted PEFT MASKGCT seeds 123 and 2024.",
+      "compute": "2 folds x 10 epochs; GPU; small artifact footprint",
+      "rank": 1,
+      "why": "Cheapest test of whether the key failure mode is seed-stable."
+    },
+    {
+      "action": "If MASKGCT repeats, run PEFT all-fold seeds 123 and 2024.",
+      "compute": "18 folds x 10 epochs; overnight-class GPU queue",
+      "rank": 2,
+      "why": "Turns PEFT-vs-frozen into a fair 3-seed comparison."
+    },
+    {
+      "action": "Write a mechanism note for adaptation-induced source inversion.",
+      "compute": "CPU/docs; may add score-distribution plots later",
+      "rank": 3,
+      "why": "This is the emerging scientific contribution, not a benchmark chase."
+    },
+    {
+      "action": "Plan CoRS extraction/indexing and ASVspoof5 staging as external validation tracks.",
+      "compute": "storage/data engineering first; no model training yet",
+      "rank": 4,
+      "why": "Needed for official/full-dataset claims, but premature before PEFT stability."
+    }
+  ],
+  "peft_seed42": {
+    "mean_auroc": 0.8485914356712992,
+    "mean_balanced_accuracy": 0.7246575660760167,
+    "mean_eer": 0.20684430391655645
+  },
+  "peft_vs_frozen": {
+    "auroc_delta_macro": 0.13395095140673552,
+    "balanced_accuracy_delta_macro": 0.11898223387404006,
+    "eer_delta_macro": -0.1332815614651115,
+    "eer_pearson_frozen_mean_vs_peft": 0.686864638642045,
+    "eer_spearman_frozen_mean_vs_peft": 0.8999999999999999,
+    "folds_degraded_by_eer": [
+      "MASKGCT"
+    ],
+    "folds_improved_by_eer": [
+      "CLAMTTS",
+      "GPST",
+      "NS2",
+      "NS3",
+      "SIMPLESPEECH1",
+      "SIMPLESPEECH2",
+      "UNIAUDIO",
+      "VALLE"
+    ]
+  },
+  "probe_vs_trained": {
+    "frozen_seed42_auroc_spearman": 0.25,
+    "frozen_seed42_eer_spearman": 0.18333333333333332
+  },
+  "schema": "mimodf-wave3-reevaluation/v1",
+  "scope": "post-deterministic Wave 3A CoSG diagnostic reassessment",
+  "updated_decisions": [
+    "Stop treating frozen-feature probes as more than weak triage for trained behavior.",
+    "Treat XLS-R frozen backend as a confirmed diagnostic baseline for CoSG source-holdout, not the target model.",
+    "Treat PEFT as the leading model family, but do not claim PEFT robustness until seeds 123/2024 complete.",
+    "Make MASKGCT the primary failure-mode case study if PEFT collapse repeats across seeds.",
+    "Defer full fine-tuning until PEFT seed stability and MASKGCT mechanism are understood.",
+    "Defer ASVspoof5 and CoRS execution until the local CoSG mechanism story is written cleanly and dataset setup is planned."
+  ]
+}

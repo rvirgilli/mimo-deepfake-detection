@@ -1,0 +1,112 @@
+schema_version: mimodf-codecfake-cors-audit/v1
+created: '2026-05-31T02:41:16.857079-03:00'
+git_revision: 3b8b3ad4d1b4fc10f6ad3b2a359ceaaafdfc2c65
+root: <datasets>/codecfake_plus
+parts:
+- path: <datasets>/codecfake_plus/Codecfake_plus_CoRS.part0
+  exists: true
+  size_bytes: 25052014980
+  mtime: '2026-05-26T20:46:37.094606-03:00'
+  sha256_sidecar:
+    path: <datasets>/codecfake_plus/Codecfake_plus_CoRS.part0.sha256
+    exists: true
+    size_bytes: 92
+    mtime: '2026-05-26T20:46:56.145950-03:00'
+    raw: 3373f5d3556ed76a50058ea2238e8eda36560ff8da8802ce33cc920b7dbe6b88  Codecfake_plus_CoRS.part0
+    looks_like_sha256: true
+- path: <datasets>/codecfake_plus/Codecfake_plus_CoRS.part1
+  exists: true
+  size_bytes: 25052014980
+  mtime: '2026-05-26T20:37:55.824996-03:00'
+  sha256_sidecar:
+    path: <datasets>/codecfake_plus/Codecfake_plus_CoRS.part1.sha256
+    exists: true
+    size_bytes: 92
+    mtime: '2026-05-26T20:47:10.081201-03:00'
+    raw: a1b480debec8209aaa367b12e93728774817f9264064e9cf263174287e2a04d7  Codecfake_plus_CoRS.part1
+    looks_like_sha256: true
+- path: <datasets>/codecfake_plus/Codecfake_plus_CoRS.part2
+  exists: true
+  size_bytes: 25052014980
+  mtime: '2026-05-26T21:24:07.852197-03:00'
+  sha256_sidecar:
+    path: <datasets>/codecfake_plus/Codecfake_plus_CoRS.part2.sha256
+    exists: true
+    size_bytes: 92
+    mtime: '2026-05-26T21:24:27.380545-03:00'
+    raw: dd818ef84b3e33bb6c97aa4fb98350cfece3aa91b9f0be6896b9c4c7e293f6b2  Codecfake_plus_CoRS.part2
+    looks_like_sha256: true
+- path: <datasets>/codecfake_plus/Codecfake_plus_CoRS.part3
+  exists: true
+  size_bytes: 25052014980
+  mtime: '2026-05-26T22:01:39.143574-03:00'
+  sha256_sidecar:
+    path: <datasets>/codecfake_plus/Codecfake_plus_CoRS.part3.sha256
+    exists: true
+    size_bytes: 92
+    mtime: '2026-05-26T22:01:57.789907-03:00'
+    raw: 7f527e13034f8e8223b469048ec8fdb9c8d5fc648fadcf1fd20b156159d65257  Codecfake_plus_CoRS.part3
+    looks_like_sha256: true
+labels:
+  exists: true
+  rows: 1422560
+  malformed_rows: 0
+  label_counts:
+    bonafide: 44455
+    spoof: 1378105
+  speaker_count: 110
+  top_speakers:
+  - - p239
+    - 16064
+  - - p236
+    - 15744
+  - - p264
+    - 15456
+  - - p250
+    - 15392
+  - - p259
+    - 15392
+  - - p247
+    - 15200
+  - - p261
+    - 15168
+  - - p263
+    - 15072
+  - - p283
+    - 15008
+  - - p286
+    - 14944
+  file_suffix_counts:
+    wav: 1422560
+  examples:
+  - p225 p225_001.wav bonafide
+  - p225 p225_001_audiodec_24k_320d.wav spoof
+  - p225 p225_001_bigcodec.wav spoof
+  - p225 p225_001_DAC24.wav spoof
+  - p225 p225_001_Encodec_24b24k.wav spoof
+download_log:
+  exists: true
+  lines: 8487
+  tail:
+  - ' 99 23.3G   99 23.2G    0     0  10.7M      0  0:37:11  0:37:07  0:00:04 10.5M'
+  - ' 99 23.3G   99 23.2G    0     0  10.7M      0  0:37:11  0:37:08  0:00:03 10.5M'
+  - ' 99 23.3G   99 23.3G    0     0  10.7M      0  0:37:11  0:37:09  0:00:02 10.5M'
+  - ' 99 23.3G   99 23.3G    0     0  10.7M      0  0:37:11  0:37:10  0:00:01 11.0M'
+  - ' 99 23.3G   99 23.3G    0     0  10.7M      0  0:37:11  0:37:11 --:--:-- 11.0M'
+  - 100 23.3G  100 23.3G    0     0  10.7M      0  0:37:11  0:37:11 --:--:-- 11.1M
+  - '[2026-05-26T22:01:44-03:00] complete Codecfake_plus_CoRS.part3 size=25052014980'
+  - '[2026-05-26T22:01:57-03:00] all CoRS parts downloaded'
+  reports_all_parts_downloaded: true
+extraction:
+  path: <datasets>/codecfake_plus/CoRS
+  exists: false
+archive_listing_attempt:
+  status: not_rerun_in_audit
+  note: Prior manual cat parts | tar -tJf - listing attempt timed out after 120s;
+    no files were extracted.
+decision:
+  downloaded_parts_present: true
+  extracted_audio_ready: false
+  training_ready: false
+  next_required_action: Plan extraction or archive-index command with explicit storage/time
+    budget, then index/readability-check extracted CoRS audio.

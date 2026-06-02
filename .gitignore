@@ -1,0 +1,66 @@
+# Environment
+.env
+.venv/
+.venv-test/
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# Large model files
+*.pt
+*.pth
+*.bin
+*.safetensors
+
+# Model directories
+models/
+SSL_Anti-spoofing/.venv/
+SSL_Anti-spoofing/xlsr2_300m.pt
+SSL_Anti-spoofing/pretrained_models/
+SSL_Anti-spoofing/scores/
+SSL_Anti-spoofing/fairseq-bundled-backup/
+
+# Experiments and outputs
+/experiments/
+/outputs/
+/logs/
+/features/
+*.log
+
+# Hydra outputs
+.hydra/
+
+# Generated document/build artifacts
+docs/build_artifacts/
+*.aux
+*.out
+*.bbl
+*.blg
+
+# Local external clones / template kits (document setup separately)
+MiMo-Audio-Tokenizer/
+SSL_Anti-spoofing/
+local_dependencies/
+*Paper_Kit__*/
+
+# Agent-local notes and ad-hoc resolved configs
+CLAUDE.md
+configs/train_seed*.yaml
+docs/current/external_dependencies.local.yaml
+
+# Local exploratory HPO. Promote deliberately if needed; exact HPO run configs
+# remain in ignored experiments/ artifacts for provenance.
+optuna_train.py
+configs/optuna/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Private local materials copied out of public branches
+/local_private/
