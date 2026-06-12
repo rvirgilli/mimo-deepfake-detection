@@ -29,6 +29,12 @@ MODEL_CONDITIONS: dict[str, dict[str, str]] = {
         "backend": "backend:aasist/v1",
         "trainable_scope": "frontend_and_backend",
     },
+    "wavlm_frozen_backend": {
+        "frontend": "frontend:wavlm-base-plus/hf-b211941/v1",
+        "adaptation": "adaptation:frozen/v1",
+        "backend": "backend:aasist/v1",
+        "trainable_scope": "backend_only",
+    },
 }
 CLASSES = ["bonafide", "spoof"]
 
@@ -210,6 +216,10 @@ def _build_split_rows(settings: CodecfakeXlsrPlanSettings, split_plan: dict[str,
 def _build_xlsr_frontend(condition: str, checkpoint_path: Path) -> Any:
     from src.frontends.wav2vec2 import Wav2Vec2Frontend
 
+    if condition == "wavlm_frozen_backend":
+        from src.frontends.wavlm import WavLMFrontend
+
+        return WavLMFrontend(local_files_only=False)
     if condition == "xlsr_frozen_backend":
         return Wav2Vec2Frontend(
             checkpoint_path=str(checkpoint_path),

@@ -115,7 +115,7 @@ def _run_training_core(settings: CodecfakeXlsrTrainSettings, *, mode: str) -> di
 
         frontend = _build_xlsr_frontend(settings.plan.condition, settings.checkpoint_path)
         model = Model(frontend=frontend)
-        if settings.plan.condition == "xlsr_frozen_backend":
+        if _is_frozen_frontend_condition(settings.plan.condition):
             model.frontend.freeze()
         model.to(settings.device)
         optimizer = torch.optim.Adam(
@@ -141,7 +141,7 @@ def _run_training_core(settings: CodecfakeXlsrTrainSettings, *, mode: str) -> di
                 criterion,
                 device=settings.device,
                 max_batches=settings.max_train_batches,
-                freeze_frontend=settings.plan.condition == "xlsr_frozen_backend",
+                freeze_frontend=_is_frozen_frontend_condition(settings.plan.condition),
             )
             val_summary = _eval_loss(
                 model,
@@ -229,7 +229,7 @@ def _run_training_core(settings: CodecfakeXlsrTrainSettings, *, mode: str) -> di
             "status": "completed_model_smoke_only" if mode == "model_smoke" else "completed",
             "mode": mode,
             "plan": plan,
-            "checkpoint_path": str(settings.checkpoint_path),
+            "checkpoint_path": _frontend_checkpoint_id(settings),
             "device": settings.device,
             "batch_size": settings.batch_size,
             "eval_batch_size": settings.eval_batch_size,
@@ -468,7 +468,7 @@ def _manifest(
 
 def _train_settings_payload(settings: CodecfakeXlsrTrainSettings) -> dict[str, Any]:
     return {
-        "checkpoint_path": str(settings.checkpoint_path),
+        "checkpoint_path": _frontend_checkpoint_id(settings),
         "epochs": settings.epochs,
         "batch_size": settings.batch_size,
         "eval_batch_size": settings.eval_batch_size,
@@ -650,8 +650,8 @@ def _checkpoint_payload(
         "checkpoint_metric": settings.checkpoint_metric,
         "label_convention": {label: index for index, label in enumerate(CLASSES)},
         "condition": settings.plan.condition,
-        "frontend_checkpoint": str(settings.checkpoint_path),
-        "frontend_checkpoint_sha256": _sha256_file(settings.checkpoint_path),
+        "frontend_checkpoint": _frontend_checkpoint_id(settings),
+        "frontend_checkpoint_sha256": _frontend_checkpoint_sha256(settings),
         "total_parameters": int(sum(param.numel() for param in model.parameters())),
         "trainable_parameters": int(
             sum(param.numel() for param in model.parameters() if param.requires_grad)
@@ -707,8 +707,24 @@ def _validate_train_settings(settings: CodecfakeXlsrTrainSettings) -> None:
         raise ValueError("max_train_batches must be positive when set")
     if settings.max_val_batches == 0:
         raise ValueError("max_val_batches must be positive when set")
-    if not settings.checkpoint_path.is_file():
+    if settings.plan.condition != "wavlm_frozen_backend" and not settings.checkpoint_path.is_file():
         raise FileNotFoundError(settings.checkpoint_path)
+
+
+def _is_frozen_frontend_condition(condition: str) -> bool:
+    return condition in {"xlsr_frozen_backend", "wavlm_frozen_backend"}
+
+
+def _frontend_checkpoint_id(settings: CodecfakeXlsrTrainSettings) -> str:
+    if settings.plan.condition == "wavlm_frozen_backend":
+        return "hf:microsoft/wavlm-base-plus@b21194173c0af7e94822c1776d162e2659fd4761"
+    return str(settings.checkpoint_path)
+
+
+def _frontend_checkpoint_sha256(settings: CodecfakeXlsrTrainSettings) -> str:
+    if settings.plan.condition == "wavlm_frozen_backend":
+        return "not_applicable_huggingface_revision_b21194173c0af7e94822c1776d162e2659fd4761"
+    return _sha256_file(settings.checkpoint_path)
 
 
 def _write_json(path: Path, payload: dict[str, Any]) -> None:
