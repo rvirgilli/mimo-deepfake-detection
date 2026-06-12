@@ -991,6 +991,31 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="Allow protocol rows with missing audio paths in the dry-run plan",
     )
+    codecfake_xlsr.add_argument(
+        "--train-subsample-total",
+        type=int,
+        help="Deterministically subsample train rows to this total (training-size control)",
+    )
+    codecfake_xlsr.add_argument(
+        "--train-subsample-bonafide",
+        type=int,
+        help="Exact bonafide count within --train-subsample-total",
+    )
+    codecfake_xlsr.add_argument(
+        "--val-subsample-total",
+        type=int,
+        help="Deterministically subsample validation rows to this total",
+    )
+    codecfake_xlsr.add_argument(
+        "--val-subsample-bonafide",
+        type=int,
+        help="Exact bonafide count within --val-subsample-total",
+    )
+    codecfake_xlsr.add_argument(
+        "--subsample-seed",
+        type=int,
+        help="Seed for subsampling (defaults to --seed)",
+    )
     codecfake_xlsr.add_argument("--batch-size", type=int, default=2)
     codecfake_xlsr.add_argument("--eval-batch-size", type=int, default=2)
     codecfake_xlsr.add_argument("--num-workers", type=int, default=0)
@@ -1752,6 +1777,11 @@ def main(argv: list[str] | None = None) -> int:
             seed=args.seed,
             out_dir=Path(args.out),
             require_audio=not args.allow_missing_audio,
+            train_subsample_total=args.train_subsample_total,
+            train_subsample_bonafide=args.train_subsample_bonafide,
+            validation_subsample_total=args.val_subsample_total,
+            validation_subsample_bonafide=args.val_subsample_bonafide,
+            subsample_seed=args.subsample_seed,
         )
         try:
             plan = build_codecfake_xlsr_dry_run_plan(settings)

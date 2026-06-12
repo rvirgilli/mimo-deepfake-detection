@@ -249,6 +249,89 @@ def build_source_holdout_rows(
     )
 
 
+def subsample_split_rows(
+    rows: SourceHoldoutRows,
+    *,
+    train_total: int | None = None,
+    train_bonafide: int | None = None,
+    validation_total: int | None = None,
+    validation_bonafide: int | None = None,
+    seed: int = 42,
+) -> SourceHoldoutRows:
+    """Deterministically subsample train/validation rows to exact label counts.
+
+    Test rows are never modified. Intended for training-size-matched controls
+    (e.g., matching every fold's train budget to the smallest fold's budget).
+    """
+
+    train_rows = list(rows.train_rows)
+    if train_total is not None:
+        train_rows = _subsample_partition(
+            train_rows,
+            total=train_total,
+            bonafide=train_bonafide,
+            seed=seed,
+            heldout=rows.heldout_source,
+            partition="train",
+        )
+    validation_rows = list(rows.validation_rows)
+    if validation_total is not None:
+        validation_rows = _subsample_partition(
+            validation_rows,
+            total=validation_total,
+            bonafide=validation_bonafide,
+            seed=seed,
+            heldout=rows.heldout_source,
+            partition="validation",
+        )
+    _require_both_labels(train_rows, f"subsampled train fold for {rows.heldout_source}")
+    _require_both_labels(validation_rows, f"subsampled validation fold for {rows.heldout_source}")
+    return SourceHoldoutRows(
+        heldout_source=rows.heldout_source,
+        train_rows=tuple(train_rows),
+        validation_rows=tuple(validation_rows),
+        test_rows=rows.test_rows,
+    )
+
+
+def _subsample_partition(
+    rows: list[dict[str, Any]],
+    *,
+    total: int,
+    bonafide: int | None,
+    seed: int,
+    heldout: str,
+    partition: str,
+) -> list[dict[str, Any]]:
+    if total <= 0:
+        raise ValueError(f"{partition} subsample total must be positive")
+    counts = _label_counts(rows)
+    if bonafide is None:
+        bonafide = round(total * counts.get("bonafide", 0) / max(1, len(rows)))
+    spoof = total - bonafide
+    if bonafide <= 0 or spoof <= 0:
+        raise ValueError(f"{partition} subsample needs at least one row of each label")
+    targets = {"bonafide": bonafide, "spoof": spoof}
+    for label, target in targets.items():
+        if target > counts.get(label, 0):
+            raise ValueError(
+                f"{partition} subsample requests {target} {label} rows but only "
+                f"{counts.get(label, 0)} are available"
+            )
+    selected: list[dict[str, Any]] = []
+    for label, target in targets.items():
+        ranked = sorted(
+            (row for row in rows if str(row["label"]) == label),
+            key=lambda row: _stable_rank(
+                seed, heldout, f"subsample:{partition}:{label}:{row['utterance_id']}"
+            ),
+        )
+        selected.extend(ranked[:target])
+    order = {id(row): index for index, row in enumerate(rows)}
+    selected.sort(key=lambda row: order[id(row)])
+    return selected
+
+
 def render_source_holdout_plan_json(plan: SourceHoldoutPlan) -> str:
     return json.dumps(plan.to_dict(), indent=2, sort_keys=True) + "\n"
 

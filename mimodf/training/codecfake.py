@@ -48,6 +48,11 @@ class CodecfakeXlsrPlanSettings:
     seed: int
     out_dir: Path
     require_audio: bool = True
+    train_subsample_total: int | None = None
+    train_subsample_bonafide: int | None = None
+    validation_subsample_total: int | None = None
+    validation_subsample_bonafide: int | None = None
+    subsample_seed: int | None = None
 
 
 @dataclass(frozen=True)
@@ -102,6 +107,22 @@ class CodecfakeXlsrDryRunPlan:
             "seed": self.settings.seed,
             "out_dir": str(self.settings.out_dir),
             "require_audio": self.settings.require_audio,
+            "subsample": {
+                "train_total": self.settings.train_subsample_total,
+                "train_bonafide": self.settings.train_subsample_bonafide,
+                "validation_total": self.settings.validation_subsample_total,
+                "validation_bonafide": self.settings.validation_subsample_bonafide,
+                "seed": (
+                    self.settings.subsample_seed
+                    if self.settings.subsample_seed is not None
+                    else self.settings.seed
+                ),
+            }
+            if (
+                self.settings.train_subsample_total is not None
+                or self.settings.validation_subsample_total is not None
+            )
+            else None,
             "split_plan_metadata": self.split_plan_metadata,
             "condition_metadata": self.condition_metadata,
             "counts": self.counts,
@@ -201,7 +222,7 @@ def _build_split_rows(settings: CodecfakeXlsrPlanSettings, split_plan: dict[str,
     fold_names = {fold["heldout_source"] for fold in split_plan.get("folds", [])}
     if settings.fold not in fold_names:
         raise ValueError(f"fold {settings.fold!r} not found in split plan")
-    return build_source_holdout_rows(
+    rows = build_source_holdout_rows(
         protocol=settings.protocol,
         heldout_source=settings.fold,
         subset=split_plan.get("subset", "CoSG"),
@@ -211,6 +232,21 @@ def _build_split_rows(settings: CodecfakeXlsrPlanSettings, split_plan: dict[str,
         seed=int(split_plan.get("seed", settings.seed)),
         require_audio=settings.require_audio,
     )
+    if (
+        settings.train_subsample_total is not None
+        or settings.validation_subsample_total is not None
+    ):
+        from mimodf.data.codecfake_splits import subsample_split_rows
+
+        rows = subsample_split_rows(
+            rows,
+            train_total=settings.train_subsample_total,
+            train_bonafide=settings.train_subsample_bonafide,
+            validation_total=settings.validation_subsample_total,
+            validation_bonafide=settings.validation_subsample_bonafide,
+            seed=settings.subsample_seed if settings.subsample_seed is not None else settings.seed,
+        )
+    return rows
 
 
 def _build_xlsr_frontend(condition: str, checkpoint_path: Path) -> Any:

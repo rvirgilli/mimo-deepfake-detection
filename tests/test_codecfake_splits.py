@@ -161,3 +161,90 @@ def test_source_holdout_plan_cli_writes_json_summary(tmp_path, capsys):
     assert printed == written
     assert printed["eligible_sources"] == ["A", "B", "C", "D"]
     assert len(printed["folds"]) == 4
+
+
+def _materialized_rows(tmp_path, *, per_group=4):
+    audio = tmp_path / "audio_sub"
+    audio.mkdir()
+    rows = []
+    for source in ["A", "B", "C"]:
+        for label in ["bonafide", "spoof"]:
+            for index in range(per_group):
+                wav = audio / f"{source}_{label}_{index}.wav"
+                wav.write_bytes(b"x")
+                rows.append(
+                    {
+                        "subset": "CoSG",
+                        "utterance_id": wav.stem,
+                        "audio_path": str(wav),
+                        "label": label,
+                        "source_model": source,
+                    }
+                )
+    return rows
+
+
+def test_subsample_split_rows_exact_counts_and_untouched_test(tmp_path):
+    from mimodf.data.codecfake_splits import subsample_split_rows
+
+    protocol = tmp_path / "protocol_sub.jsonl"
+    _write_protocol(protocol, _materialized_rows(tmp_path))
+    rows = build_source_holdout_rows(
+        protocol=protocol,
+        heldout_source="A",
+        validation_policy="stratified-row",
+        validation_fraction=0.25,
+        seed=42,
+    )
+
+    sub = subsample_split_rows(rows, train_total=6, train_bonafide=2, seed=42)
+
+    labels = [row["label"] for row in sub.train_rows]
+    assert len(sub.train_rows) == 6
+    assert labels.count("bonafide") == 2
+    assert labels.count("spoof") == 4
+    assert sub.test_rows == rows.test_rows
+    assert sub.validation_rows == rows.validation_rows
+    train_ids = {row["utterance_id"] for row in rows.train_rows}
+    assert all(row["utterance_id"] in train_ids for row in sub.train_rows)
+
+
+def test_subsample_split_rows_is_deterministic_and_seed_sensitive(tmp_path):
+    from mimodf.data.codecfake_splits import subsample_split_rows
+
+    protocol = tmp_path / "protocol_sub2.jsonl"
+    _write_protocol(protocol, _materialized_rows(tmp_path))
+    rows = build_source_holdout_rows(
+        protocol=protocol,
+        heldout_source="A",
+        validation_policy="stratified-row",
+        validation_fraction=0.25,
+        seed=42,
+    )
+
+    first = subsample_split_rows(rows, train_total=6, train_bonafide=3, seed=7)
+    second = subsample_split_rows(rows, train_total=6, train_bonafide=3, seed=7)
+    other = subsample_split_rows(rows, train_total=6, train_bonafide=3, seed=8)
+
+    ids = lambda r: [row["utterance_id"] for row in r.train_rows]  # noqa: E731
+    assert ids(first) == ids(second)
+    assert ids(first) != ids(other)
+
+
+def test_subsample_split_rows_rejects_impossible_requests(tmp_path):
+    from mimodf.data.codecfake_splits import subsample_split_rows
+
+    protocol = tmp_path / "protocol_sub3.jsonl"
+    _write_protocol(protocol, _materialized_rows(tmp_path))
+    rows = build_source_holdout_rows(
+        protocol=protocol,
+        heldout_source="A",
+        validation_policy="stratified-row",
+        validation_fraction=0.25,
+        seed=42,
+    )
+
+    with pytest.raises(ValueError, match="only"):
+        subsample_split_rows(rows, train_total=100, train_bonafide=50, seed=42)
+    with pytest.raises(ValueError, match="each label"):
+        subsample_split_rows(rows, train_total=4, train_bonafide=4, seed=42)
